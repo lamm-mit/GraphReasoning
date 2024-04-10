@@ -27,8 +27,60 @@ Model weights and other data:
 [lamm-mit/GraphReasoning
 ](https://huggingface.co/lamm-mit/GraphReasoning/tree/main)
 
+Graph file:
+```
+from huggingface_hub import hf_hub_download
+data_dir='./GRAPHDATA/'    
+graph_name='BioGraph.graphml'
+filename = f"{data_dir}/{graph_name}"
+file_path = hf_hub_download(repo_id=repository_id, filename=filename,  local_dir='./')
+```
 Embeddings: 
+```
+from huggingface_hub import hf_hub_download
+data_dir='./GRAPHDATA/'    
+embedding_file='BioGraph_embeddings_ge-large-en-v1.5.pkl'
+filename = f"{data_dir}/{embedding_file}"
+file_path = hf_hub_download(repo_id=repository_id, filename=filename, local_dir='./')
+```
+Example:
+```
+from transformers import AutoTokenizer, AutoModel
 
+from GraphReasoning import *
+
+embedding_tokenizer = AutoTokenizer.from_pretrained(tokenizer_model, ) 
+embedding_model = AutoModel.from_pretrained(tokenizer_model, ) 
+
+data_dir_output='./GRAPHDATA_OUTPUT/'
+make_dir_if_needed(data_dir_output)
+
+data_dir='./GRAPHDATA/'    
+
+graph_name=f'{data_dir}/{graph_name}'
+G = nx.read_graphml(graph_name)
+node_embeddings = load_embeddings(f'{data_dir}/{embedding_file}')
+
+visualize_embeddings_2d_pretty_and_sample(node_embeddings,
+                                            n_clusters=10, n_samples=10,
+                                            data_dir=data_dir_output, alpha=.7)
+
+describe_communities_with_plots_complex(G, N=6, data_dir=data_dir_output)
+```
+Analyze graph and extract information:
+```
+find_best_fitting_node_list("copper", node_embeddings, embedding_tokenizer, embedding_model, 5)
+```
+Find path:
+```
+(best_node_1, best_similarity_1, best_node_2, best_similarity_2), path, path_graph, shortest_path_length, fname, graph_GraphML=find_path( G, node_embeddings,
+                                embedding_tokenizer, embedding_model , second_hop=False, data_dir=data_dir_output,
+                                  keyword_1 = "copper", keyword_2 = "silk",
+                                      similarity_fit_ID_node_1=0, similarity_fit_ID_node_2=0,
+                                       )
+path_list, path_string=print_path_with_edges_as_list(G , path)
+path_list, path_string, path
+```
 
 # Reference
 
