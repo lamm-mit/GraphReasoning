@@ -22,6 +22,13 @@ If you plan to use llama.cpp, install using:
 ```
 CMAKE_ARGS="-DLLAMA_CUBLAS=on " pip install  'git+https://github.com/abetlen/llama-cpp-python.git#egg=llama-cpp-python[server]' --force-reinstall --upgrade --no-cache-dir
 ```
+Model weights and other data: 
+
+[lamm-mit/GraphReasoning
+](https://huggingface.co/lamm-mit/GraphReasoning/tree/main)
+
+Embeddings: 
+
 
 # Reference
 
