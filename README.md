@@ -55,14 +55,12 @@ CMAKE_ARGS="-DLLAMA_CUBLAS=on " pip install  'git+https://github.com/abetlen/lla
    - [Graph Visualization](#graph-visualization)
    - [Graph Statistics, Exporting/Rendering, and Plots](#graph-statistics-and-plots)
    - [Graph Simplification](#graph-simplification)
-5. [X-LoRA Tools](#x-lora-tools)
-   - [Plotting Model Scalings](#plotting-model-scalings)
-6. [Conversational Agents](#conversational-agents)
+5. [Conversational Agents](#conversational-agents)
    - [ConversationAgent Class](#conversationagent-class)
    - [Conversation Simulation](#conversation-simulation)
    - [Conversation Summarization](#conversation-summarization)
    - [Question Answering with Agents](#question-answering-with-agents)
-7. [Full API](#full_api)
+6. [Full API](#full_api)
 
 ## Introduction <a name="introduction"></a>
 
@@ -556,34 +554,7 @@ The `agents.py` file provides classes and functions for creating and working wit
   - `verbatim` (bool): Whether to print verbose output. Default is False.
 - **Returns:**
   - `embeddings_updated` (dict): The updated node embeddings.
-
-## xlora_tools.py
-
-### `plot_scalings(model, cmap='viridis', directory='plots', bar_labels=None, plot_name_root='plot')`
-- **Description:** Plots the scalings of an X-LoRA model in various ways.
-- **Input:**
-  - `model`: The X-LoRA model to plot scalings for.
-  - `cmap` (str): The color map to use for the plots. Default is 'viridis'.
-  - `directory` (str): The directory to save the plots to. Default is 'plots'.
-  - `bar_labels` (list): A list of labels for the bar plot. Default is None.
-  - `plot_name_root` (str): The root name for the plot files. Default is 'plot'.
-- **Returns:** None. Saves various plots of the model scalings.
-
-### `plot_scalings_from_tensor(scalings_pred, cmap='viridis', directory='plots', bar_labels=None, plot_name_root='plot', imtype='svg', summed_bar_plot=False, imshow_plot=False, summed_plot=False, surface_plot=True)`
-- **Description:** Plots the scalings from a tensor in various ways.
-- **Input:**
-  - `scalings_pred` (torch.Tensor): The scalings tensor to plot.
-  - `cmap` (str): The color map to use for the plots. Default is 'viridis'.
-  - `directory` (str): The directory to save the plots to. Default is 'plots'.
-  - `bar_labels` (list): A list of labels for the bar plot. Default is None.
-  - `plot_name_root` (str): The root name for the plot files. Default is 'plot'.
-  - `imtype` (str): The image type to save the plots as. Default is 'svg'.
-  - `summed_bar_plot` (bool): Whether to create a summed bar plot. Default is False.
-  - `imshow_plot` (bool): Whether to create an imshow plot. Default is False.
-  - `summed_plot` (bool): Whether to create a summed plot. Default is False.
-  - `surface_plot` (bool): Whether to create a surface plot. Default is True.
-- **Returns:** None. Saves various plots of the scalings tensor.
-
+    
 ## agents.py
 
 ### `ConversationAgent` class
