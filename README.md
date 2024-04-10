@@ -10,25 +10,24 @@ This library provides all codes and libraries used in the paper: https://arxiv.o
 
 ![image](https://github.com/lamm-mit/GraphReasoning/assets/101393859/3baa3752-8222-4857-a64c-c046693d6315)
 
+# Installation and Examples
+
+```
+pip install git+https://github.com/lamm-mit/GraphReasoning
+```
+
+# Reference
+
 ```LaTeX
-@misc{Buehler2024Accelerating,
+@misc{Buehler2024AcceleratingDiscoveryGraphReasoning,
     author = {Buehler, Markus J.},
     title = {Accelerating Scientific Discovery with Generative Knowledge Extraction, Graph-Based Representation, and Multimodal Intelligent Graph Reasoning},
     year = {2024},
     eprint = {2403.11996},
     archivePrefix = {arXiv},
-    primaryClass = {cs.LG},
     doi = {10.48550/arXiv.2403.11996},
-    version = {v2},
-    date = {26 March 2024},
     url = {https://doi.org/10.48550/arXiv.2403.11996}
 }
-```
-
-# Installation and Examples
-
-```
-pip install git+https://github.com/lamm-mit/GraphReasoning
 ```
 
 # API Documentation for Graph Analysis and Reasoning Code
