@@ -37,6 +37,7 @@ setup(
         scipy,
         seaborn,
         uuid,
+        pdfminer,
         
     ],
     description='A brief description of your package.',
