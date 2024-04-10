@@ -659,7 +659,7 @@ def is_scale_free(G, plot_distribution=True, data_dir='./', manual_xmin=None):
 
     return is_scale_free, fit
 
-def print_path_with_edges_as_list(G, path, keywords_separator=' --> '):
+def print_path_with_edges_as_list_multigraph (G, path, keywords_separator=' --> '):
     path_elements = []
 
     for i in range(len(path) - 1):
@@ -675,6 +675,32 @@ def print_path_with_edges_as_list(G, path, keywords_separator=' --> '):
             edge_title = " or ".join(titles)  # This handles multiple edges by joining their titles with " or "
         else:
             edge_title = 'No title'
+        # Construct the path elements, inserting the edge title between node pairs
+        if i == 0:
+            path_elements.append(node1)  # Add the first node
+        path_elements.append(edge_title)  # Add the edge title
+        path_elements.append(node2)  # Add the second node
+
+    # Convert the list of path elements into a string with the specified separator
+    as_string = keywords_separator.join(path_elements)
+
+    return path_elements, as_string
+
+def print_path_with_edges_as_list(G, path, keywords_separator=' --> '):
+    path_elements = []
+
+    for i in range(len(path) - 1):
+        node1 = path[i]
+        node2 = path[i + 1]
+
+        # Retrieve edge data between node1 and node2
+        edge_data = G.get_edge_data(node1, node2)
+
+        # Access the 'title' directly from the edge_data
+        if edge_data:
+            edge_title = edge_data.get('title', 'No title')
+        else:
+            edge_title = 'No title'
 
         # Construct the path elements, inserting the edge title between node pairs
         if i == 0:
@@ -686,7 +712,7 @@ def print_path_with_edges_as_list(G, path, keywords_separator=' --> '):
     as_string = keywords_separator.join(path_elements)
 
     return path_elements, as_string
- 
+    
 def find_path_and_reason (G, node_embeddings,  tokenizer, model, generate, 
                           keyword_1 = "music and sound",
                          # local_llm=None,
