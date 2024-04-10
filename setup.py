@@ -35,6 +35,9 @@ setup(
         ipython,
         scikit-learn,
         scipy,
+        seaborn,
+        uuid,
+        
     ],
     description='A brief description of your package.',
     long_description=open('README.md').read(),
