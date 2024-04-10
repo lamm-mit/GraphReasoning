@@ -12,9 +12,15 @@ This library provides all codes and libraries used in the paper: https://arxiv.o
 
 # Installation and Examples
 
+Install directly from GitHub:
 ```
 pip install git+https://github.com/lamm-mit/GraphReasoning
 ```
+Or, editable:
+```
+pip install -e git+https://github.com/lamm-mit/GraphReasoning
+```
+
 
 # Reference
 
