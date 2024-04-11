@@ -5,7 +5,6 @@ from GraphReasoning.graph_analysis import *
 import copy
 
 import re
-#from guidance import gen, select, system, user, assistant,  newline
 from IPython.display import display, Markdown
 
 import markdown2
@@ -33,7 +32,6 @@ import itertools
 import seaborn as sns
 palette = "hls"
 
-
 import uuid
 import pandas as pd
 import numpy as np
@@ -51,20 +49,14 @@ import seaborn as sns  # For more attractive plotting
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
  
-
-## This function uses the helpers/prompt function to extract concepts from text
-#from helpers.df_helpers import df2Graph
-#from helpers.df_helpers import graph2Df
 import pandas as pd
 
 import transformers
 from transformers import logging
 
-#transformers.logging.set_verbosity_info()
 logging.set_verbosity_error()
 
 import re
-#from guidance import gen, select, system, user, assistant,  newline
 from IPython.display import display, Markdown
 
 import markdown2
@@ -88,10 +80,8 @@ from pyvis.network import Network
 
 from tqdm.notebook import tqdm
 
-
 import seaborn as sns
 palette = "hls"
-
 
 import uuid
 import pandas as pd
@@ -109,7 +99,6 @@ import seaborn as sns  # For more attractive plotting
 
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-
 
 # Code based on: https://github.com/rahulnyk/knowledge_graph
 
@@ -130,24 +119,7 @@ def documents2Dataframe(documents) -> pd.DataFrame:
 
     df = pd.DataFrame(rows)
     return df
-'''
-def df2ConceptsList(dataframe: pd.DataFrame) -> list:
-    # dataframe.reset_index(inplace=True)
-    results = dataframe.apply(
-        lambda row: extractConcepts(
-            row.text, {"chunk_id": row.chunk_id, "type": "concept"}
-        ),
-        axis=1,
-    )
-    # invalid json results in NaN
-    results = results.dropna()
-    results = results.reset_index(drop=True)
 
-    ## Flatten the list of lists to one single list of entities.
-    concept_list = np.concatenate(results).ravel().tolist()
-    return concept_list
-
-'''
 def concepts2Df(concepts_list) -> pd.DataFrame:
     ## Remove all NaN entities
     concepts_dataframe = pd.DataFrame(concepts_list).replace(" ", np.nan)
@@ -160,9 +132,9 @@ def concepts2Df(concepts_list) -> pd.DataFrame:
 
 
 def df2Graph(dataframe: pd.DataFrame, generate, repeat_refine=0, verbatim=False,
-            # model=None
+          
             ) -> list:
-    # dataframe.reset_index(inplace=True)
+  
     results = dataframe.apply(
         lambda row: graphPrompt(row.text, generate, {"chunk_id": row.chunk_id}, repeat_refine=repeat_refine,
                                 verbatim=verbatim,#model
@@ -191,49 +163,11 @@ from yachalk import chalk
 sys.path.append("..")
 
 import json
-#import ollama.client as client
-
-'''
-def extractConcepts(prompt: str, metadata={}
-                   # , model="mistral-openorca:latest"
-                   ):
-    SYS_PROMPT = (
-        "Your task is extract the key concepts (and non personal entities) mentioned in the given context. "
-        "Extract only the most important and atomistic concepts, if  needed break the concepts down to the simpler concepts."
-        "Categorize the concepts in one of the following categories: "
-        "[event, concept, place, object, document, organisation, condition, misc]\n"
-        "Format your output as a list of json with the following format:\n"
-        "[\n"
-        "   {\n"
-        '       "entity": The Concept,\n'
-        '       "importance": The concontextual importance of the concept on a scale of 1 to 5 (5 being the highest),\n'
-        '       "category": The Type of Concept,\n'
-        "   }, \n"
-        "{ }, \n"
-        "]\n"
-    )
-    
-    response = generate( system_prompt='You respond accurately.', prompt=SYS_PROMPT+prompt)
-    try:
-        result = json.loads(response)
-        result = [dict(item, **metadata) for item in result]
-    except:
-        print("\n\nERROR ### Here is the buggy response: ", response, "\n\n")
-        result = None
-    return result
-'''
 
 def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:latest",
                 repeat_refine=0,verbatim=False,
                ):
-    #if model == None:
-    #    model = "mistral-openorca:latest"
-
-    # model_info = client.show(model_name=model)
-    # print( chalk.blue(model_info))
-
-    #See Llama index graph prompts
-    #############################################################################################
+    
     SYS_PROMPT_GRAPHMAKER = (
         "You are a network ontology graph maker who extracts terms and their relations from a given context, using category theory. "
         "You are provided with a context chunk (delimited by ```) Your task is to extract the ontology "
@@ -281,13 +215,12 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
         )
         
     USER_PROMPT = f"Context: ```{input}``` \n\nOutput: "
-    #response  = client.generate( system=SYS_PROMPT, prompt=prompt)
-    #print (USER_PROMPT[:128])
+    
     print (".", end ="")
     response  =  generate( system_prompt=SYS_PROMPT_GRAPHMAKER, prompt=USER_PROMPT)
     if verbatim:
         print ("---------------------\nFirst result: ", response)
-    #############################################################################################
+   
     SYS_PROMPT_FORMAT = ('You respond in this format:'
                  '[\n'
                     "   {\n"
@@ -298,15 +231,12 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
     USER_PROMPT = (f'Read this context: ```{input}```.'
                   f'Read this ontology: ```{response}```'
                  f'\n\nImprove the ontology by renaming nodes so that they have consistent labels that are widely used in the field of materials science.'''
-                # f'\n\nAdd additional triplets to the original list, if possible, in the same format.\n'
-                 '')# f'\n\nAdd additional triplets to the original list, if possible, in the same format.\n 
-    response  =  generate( system_prompt=SYS_PROMPT_FORMAT, #SYS_PROMPT_GRAPHMAKER, 
+                 '')
+    response  =  generate( system_prompt=SYS_PROMPT_FORMAT,
                           prompt=USER_PROMPT)
     if verbatim:
         print ("---------------------\nAfter improve: ", response)
     
-
-
     USER_PROMPT = f"Context: ```{response}``` \n\n Fix to make sure it is proper format. "
     response  =  generate( system_prompt=SYS_PROMPT_FORMAT, prompt=USER_PROMPT)
     response =   response.replace ('\\', '' )
@@ -320,10 +250,9 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
             
             USER_PROMPT = (f'Insert new triplets into the original ontology. Read this context: ```{input}```.'
                           f'Read this ontology: ```{response}```'
-                        # f'\n\nRevise the ontology by renaming nodes so that they have as few as possible, and consistent labels.'''
-                         f'\n\nInsert additional triplets to the original list, in the same JSON format. Repeat original AND new triplets.\n'
-                         '')# f'\n\nAdd additional triplets to the original list, if possible, in the same format.\n 
-            response  =  generate( system_prompt=SYS_PROMPT_GRAPHMAKER, #SYS_PROMPT_GRAPHMAKER, 
+                          f'\n\nInsert additional triplets to the original list, in the same JSON format. Repeat original AND new triplets.\n'
+                         '') 
+            response  =  generate( system_prompt=SYS_PROMPT_GRAPHMAKER, 
                                   prompt=USER_PROMPT)
             if verbatim:
                 print ("---------------------\nAfter adding triplets: ", response)
@@ -333,27 +262,24 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
             USER_PROMPT = (f'Read this context: ```{input}```.'
                           f'Read this ontology: ```{response}```'
                          f'\n\nRevise the ontology by renaming nodes and edges so that they have consistent and concise labels.'''
-                        # f'\n\nAdd additional triplets to the original list, if possible, in the same format.\n'
-                         '')# f'\n\nAdd additional triplets to the original list, if possible, in the same format.\n 
-            response  =  generate( system_prompt=SYS_PROMPT_FORMAT, #SYS_PROMPT_GRAPHMAKER, 
+                        
+                         '') 
+            response  =  generate( system_prompt=SYS_PROMPT_FORMAT,  
                                   prompt=USER_PROMPT)            
             if verbatim:
                 print (f"---------------------\nAfter refine {rep}/{repeat_refine}: ", response)
 
-    
-    #############################################################################################
-    
+     
     USER_PROMPT = f"Context: ```{response}``` \n\n Fix to make sure it is proper format. "
     response  =  generate( system_prompt=SYS_PROMPT_FORMAT, prompt=USER_PROMPT)
     response =   response.replace ('\\', '' )
     
     try:
         response=extract (response)
-        #print (response)
+       
     except:
         print (end='')
     
-    #response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=USER_PROMPT)
     try:
         result = json.loads(response)
         print (result)
@@ -363,9 +289,8 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
         result = None
     return result
 
-## Now add these colors to communities and make another dataframe
 def colors2Community(communities) -> pd.DataFrame:
-    ## Define a color palette
+    
     p = sns.color_palette(palette, len(communities)).as_hex()
     random.shuffle(p)
     rows = []
@@ -377,7 +302,6 @@ def colors2Community(communities) -> pd.DataFrame:
             rows += [{"node": node, "color": color, "group": group}]
     df_colors = pd.DataFrame(rows)
     return df_colors
-
 
 def contextual_proximity(df: pd.DataFrame) -> pd.DataFrame:
     ## Melt the dataframe into a list of nodes
@@ -409,24 +333,21 @@ def contextual_proximity(df: pd.DataFrame) -> pd.DataFrame:
     
 def make_graph_from_text (txt,generate,
                           include_contextual_proximity=False,
-                        # graph_HTML = "./resulting_graph.html",
-                         graph_root='graph_root',
-                        # graph_GraphML='resulting_graph.graphml',
+                          graph_root='graph_root',
                           chunk_size=2500,chunk_overlap=0,
-                         repeat_refine=0,verbatim=False,
-                         data_dir='./data_output_KG/',
-                         save_PDF=False,#TO DO
+                          repeat_refine=0,verbatim=False,
+                          data_dir='./data_output_KG/',
+                          save_PDF=False,#TO DO
                           save_HTML=True,
                          ):    
     
     ## data directory
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)     
-    #inputdirectory = Path(f"./{data_dir}")
+     
     outputdirectory = Path(f"./{data_dir}/") #where graphs are stored from graph2df function
     
-    
-    documents = txt
+ 
     splitter = RecursiveCharacterTextSplitter(
         #chunk_size=5000, #1500,
         chunk_size=chunk_size, #1500,
@@ -463,8 +384,7 @@ def make_graph_from_text (txt,generate,
     dfg1.replace("", np.nan, inplace=True)
     dfg1.dropna(subset=["node_1", "node_2", 'edge'], inplace=True)
     dfg1['count'] = 4 
-    ## Increasing the weight of the relation to 4. 
-    ## We will assign the weight of 1 when later the contextual proximity will be calculated.  
+      
     if verbatim:
         print("Shape of graph DataFrame: ", dfg1.shape)
     dfg1.head()### 
@@ -503,7 +423,7 @@ def make_graph_from_text (txt,generate,
         node_list.append (node)
     
     ## Add edges to the graph
-    for index, row in dfg.iterrows():
+    for _, row in dfg.iterrows():
         
         G.add_edge(
             str(row["node_1"]),
@@ -516,7 +436,7 @@ def make_graph_from_text (txt,generate,
         node_2_list.append (row["node_2"])
         title_list.append (row["edge"])
         weight_list.append (row['count']/4)
-        #weight_list.append (row['count'] )
+         
         chunk_id_list.append (row['chunk_id'] )
 
     try:
@@ -534,7 +454,7 @@ def make_graph_from_text (txt,generate,
         print ("Error saving CSV/JSON files.")
     
     communities_generator = nx.community.girvan_newman(G)
-    top_level_communities = next(communities_generator)
+    #top_level_communities = next(communities_generator)
     next_level_communities = next(communities_generator)
     communities = sorted(map(sorted, next_level_communities))
     
@@ -556,30 +476,26 @@ def make_graph_from_text (txt,generate,
     net = Network(
              
             notebook=True,
-            # bgcolor="#1a1a1a",
+         
             cdn_resources="remote",
             height="900px",
             width="100%",
             select_menu=True,
-            # font_color="#cccccc",
+            
             filter_menu=False,
         )
         
     net.from_nx(G)
-    # net.repulsion(node_distance=150, spring_length=400)
     net.force_atlas_2based(central_gravity=0.015, gravity=-31)
-    # net.barnes_hut(gravity=-18100, central_gravity=5.05, spring_length=380)
-    
-    #net.show_buttons(filter_=["physics"])
+   
     net.show_buttons()
     
-    #net.show(graph_output_directory, notebook=False)
     graph_HTML= f'{data_dir}/{graph_root}_grapHTML.html'
     graph_GraphML=  f'{data_dir}/{graph_root}_graphML.graphml'  #  f'{data_dir}/resulting_graph.graphml',
     nx.write_graphml(G, graph_GraphML)
     
     if save_HTML:
-        net.show(graph_HTML, #notebook=True
+        net.show(graph_HTML,
             )
 
     if save_PDF:
@@ -606,7 +522,6 @@ def add_new_subgraph_from_text(txt,generate,node_embeddings,tokenizer, model,
                                save_common_graph=False,G_to_add=None,graph_GraphML_to_add=None,
                               ):
 
-    #txt=f"{data['title'][idx]} {data['summary'][idx]} {data['key_fact'][idx]}"
     display (Markdown(txt[:256]+"...."))
     graph_GraphML=None
      
@@ -642,23 +557,10 @@ def add_new_subgraph_from_text(txt,generate,node_embeddings,tokenizer, model,
 
             if graph_GraphML_to_add!=None:
                 print ("Loading graph: ", graph_GraphML_to_add)
-            #elif  G_to_add!=None:
-            #    print ("Using provided graph to add")
-                
-                
-
-            
         
         print("--- %s seconds ---" % (time.time() - start_time))
     except:
         print ("ALERT: Graph generation failed...for idx=",idx)
-        #failed_list.append (idx)
-
-
-        #data_dir=f'graph_V1'
-    #graph_root=f'graph_{idx}'
-    #fname=f'{data_dir}/{graph_root}_graphML.graphml'
-
     
     print ("Now add node to existing graph...")
     
@@ -679,11 +581,7 @@ def add_new_subgraph_from_text(txt,generate,node_embeddings,tokenizer, model,
                                                        make_graph_plot=False,root='new_graph')
         print (res_newgraph)
         
-        #print (".")
         G_new = nx.compose(G,G_loaded)
-
-        ##################################################
-
 
         if save_common_graph:
             print ("Identify common nodes and save...")
@@ -691,7 +589,6 @@ def add_new_subgraph_from_text(txt,generate,node_embeddings,tokenizer, model,
                 
                 common_nodes = set(G.nodes()).intersection(set(G_loaded.nodes()))
     
-                # Generate a subgraph with all the nodes that connect G and G_loaded
                 subgraph = G_new.subgraph(common_nodes)
                 graph_GraphML=  f'{data_dir_output}/{graph_root}_common_nodes_before_simple.graphml' 
                 nx.write_graphml(subgraph, graph_GraphML)
@@ -714,9 +611,6 @@ def add_new_subgraph_from_text(txt,generate,node_embeddings,tokenizer, model,
             
         if verbatim:
             print ("Done update graph")
-        
-        #visualize_embeddings_2d_pretty_and_sample(node_embeddings_simple, n_clusters=5, n_samples=3, data_dir=data_dir, alpha=.3)
-        print (".")
         
         if size_threshold >0:
             if verbatim:
@@ -759,5 +653,3 @@ def add_new_subgraph_from_text(txt,generate,node_embeddings,tokenizer, model,
     
     
     return graph_GraphML, G_new, G_loaded, G, node_embeddings, res
-
-
