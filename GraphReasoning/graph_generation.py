@@ -509,10 +509,9 @@ def make_graph_from_text (txt,generate,
     print ("Graph statistics: ", res_stat)
     return graph_HTML, graph_GraphML, G, net, output_pdf
 
-
-
 import time
 from copy import deepcopy
+
 def add_new_subgraph_from_text(txt,generate,node_embeddings,tokenizer, model,
                                original_graph_path_and_fname,
                                data_dir_output='./data_temp/', verbatim=True,
@@ -625,7 +624,6 @@ def add_new_subgraph_from_text(txt,generate,node_embeddings,tokenizer, model,
             G_new = G_new.subgraph(connected_components[0]).copy()
             node_embeddings=update_node_embeddings(node_embeddings, G_new, tokenizer, model, verbatim=verbatim)
             
-        
         print (".")
         if do_Louvain_on_new_graph:
             G_new=graph_Louvain (G_new, 
@@ -645,11 +643,8 @@ def add_new_subgraph_from_text(txt,generate,node_embeddings,tokenizer, model,
         
         print ("Graph statistics: ", res)
 
-
     except:
         print ("Error adding new graph.")
         print (end="")
 
-    
-    
     return graph_GraphML, G_new, G_loaded, G, node_embeddings, res

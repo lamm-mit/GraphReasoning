@@ -1,7 +1,3 @@
-#from GraphReasoning.utils import *
-#from GraphReasoning.graph_generation import *
-
-#from GraphReasoning.graph_generation import *
 import heapq
 
 import copy
@@ -23,7 +19,6 @@ import pandas as pd  # Assuming colors2Community returns a pandas DataFrame
 
 import seaborn as sns
 import re
-#from guidance import gen, select, system, user, assistant,  newline
 from IPython.display import display, Markdown
 
 import markdown2
@@ -48,10 +43,8 @@ from pyvis.network import Network
 
 from tqdm.notebook import tqdm
 
-
 import seaborn as sns
 palette = "hls"
-
 
 import uuid
 import pandas as pd
@@ -72,11 +65,10 @@ import matplotlib.pyplot as plt
 import transformers
 from transformers import logging
 
-#transformers.logging.set_verbosity_info()
 logging.set_verbosity_error()
 
 import re
-#from guidance import gen, select, system, user, assistant,  newline
+
 from IPython.display import display, Markdown
 
 import markdown2
@@ -100,10 +92,8 @@ from pyvis.network import Network
 
 from tqdm.notebook import tqdm
 
-
 import seaborn as sns
 palette = "hls"
-
 
 import uuid
 import pandas as pd
@@ -440,38 +430,6 @@ def graph_statistics_and_plots(G, data_dir='./'):
     }
     
     return statistics
-'''
-def graph_statistics_and_plots_for_large_graphs(G, data_dir='./'):
-    # Calculate statistics
-    degrees = [degree for node, degree in G.degree()]
-    log_degrees = np.log1p(degrees)  # Using log1p for a better handle on zero degrees
-    degree_distribution = np.bincount(degrees)
-    density = nx.density(G)
-    connected_components = nx.number_connected_components(G)
-    
-    # Plot Degree Distribution on a log-log scale
-    plt.figure(figsize=(10, 6))
-    counts, bins, patches = plt.hist(log_degrees, bins=50, alpha=0.75, color='blue', log=True)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.title('Log-Log Degree Distribution')
-    plt.xlabel('Degree (log)')
-    plt.ylabel('Frequency (log)')
-    plt.savefig(f'{data_dir}/loglog_degree_distribution.svg')
-    plt.close()
-    
-    statistics = {
-        'Density': density,
-        'Connected Components': connected_components,
-    }
-    
-    return statistics
-    
-import matplotlib.pyplot as plt
-import networkx as nx
-import numpy as np
-import community as community_louvain  # pip install python-louvain for community detection
-'''
  
 def graph_statistics_and_plots_for_large_graphs(G, data_dir='./', include_centrality=False,
                                                make_graph_plot=False,root='graph'):
@@ -480,11 +438,10 @@ def graph_statistics_and_plots_for_large_graphs(G, data_dir='./', include_centra
     num_edges = G.number_of_edges()
     degrees = [degree for node, degree in G.degree()]
     log_degrees = np.log1p(degrees)  # Using log1p for a better handle on zero degrees
-    degree_distribution = np.bincount(degrees)
+    #degree_distribution = np.bincount(degrees)
     average_degree = np.mean(degrees)
     density = nx.density(G)
     connected_components = nx.number_connected_components(G)
-
     
     # Centrality measures
     if include_centrality:
@@ -611,46 +568,6 @@ def save_graph (G,
         print("Error, no file name provided.")
     return 
 
-'''
-def update_node_embeddings(embeddings, graph_new, tokenizer, model, remove_embeddings_for_nodes_no_longer_in_graph=True,
-                          verbatim=False):
-    """
-    Update embeddings for new nodes in an updated graph.
-
-    Args:
-    - embeddings (dict): Existing node embeddings.
-    - graph_new: The updated graph object.
-    - tokenizer: Tokenizer object to tokenize node names.
-    - model: Model object to generate embeddings.
-
-    Returns:
-    - Updated embeddings dictionary with embeddings for new nodes.
-    """
-    # Iterate through new graph nodes
-    for node in tqdm(graph_new.nodes()):
-        # Check if the node already has an embedding
-        if node not in embeddings:
-            if verbatim:
-                print(f"Generating embedding for new node: {node}")
-            inputs = tokenizer(node, return_tensors="pt")
-            outputs = model(**inputs)
-            # Update the embeddings dictionary with the new node's embedding
-            embeddings[node] = outputs.last_hidden_state.mean(dim=1).detach().numpy()
-        else:
-            #print(f"Skipping existing node: {node}")
-            print (end="")
-
-    if remove_embeddings_for_nodes_no_longer_in_graph:
-        # Remove embeddings for nodes that no longer exist in the graph
-        nodes_in_graph = set(graph_new.nodes())
-        for node in list(embeddings):
-            if node not in nodes_in_graph:
-                if verbatim:
-                    print(f"Removing embedding for node no longer in graph: {node}")
-                del embeddings[node]
-
-    return embeddings
-'''
 def update_node_embeddings(embeddings, graph_new, tokenizer, model, remove_embeddings_for_nodes_no_longer_in_graph=True,
                           verbatim=False):
     """
@@ -689,88 +606,6 @@ def update_node_embeddings(embeddings, graph_new, tokenizer, model, remove_embed
                 del embeddings_updated[node]
 
     return embeddings_updated
-'''    
-def add_new_subgraph_from_text(txt,generate,embeddings,tokenizer, model,
-                               original_graph_path_and_fname,
-                               data_dir_output='./data_temp/', verbatim=True,
-                               size_threshold=10,
-                               do_Louvain_on_new_graph=True,  chunk_size=10000, repeat_refine=0 ,
-                              ):
-
-    #txt=f"{data['title'][idx]} {data['summary'][idx]} {data['key_fact'][idx]}"
-    display (Markdown(txt[:256]+"...."))
-
-    try:
-        start_time = time.time()
-        idx=0
-        _, graph_GraphML_all_1, G_all_1, _, _ =make_graph_from_text (txt,generate,
-                                  include_contextual_proximity=False,
-                                  
-                                 data_dir=data_dir_output,
-                                 graph_root=f'graph_new_{idx}',
-                                
-                                    chunk_size=chunk_size,   repeat_refine=repeat_refine, 
-                                  verbatim=verbatim,
-                                   
-                              )
-        print("--- %s seconds ---" % (time.time() - start_time))
-    except:
-        print ("ALERT: Graph generation failed...for idx=",idx)
-        #failed_list.append (idx)
-
-
-        #data_dir=f'graph_V1'
-    #graph_root=f'graph_{idx}'
-    #fname=f'{data_dir}/{graph_root}_graphML.graphml'
-
-
-
-    print ("Now add node to existing graph...")
-    try:
-        G = nx.read_graphml(original_graph_path_and_fname)
-        #print (".")
-        G_loaded = nx.read_graphml(graph_GraphML_all_1)
-        #print (".")
-        G_new = nx.compose(G,G_loaded)
-
-        #print (".")
-        if size_threshold >0:
-            
-            # Find all connected components, returned as sets of nodes
-            components = list(nx.connected_components(G_new))
-            
-            # Iterate through components and remove those smaller than the threshold
-            for component in components:
-                if len(component) < size_threshold:
-                    # Remove the nodes in small components
-                    G_new.remove_nodes_from(component)
-
-        
-        #print (".")
-        if do_Louvain_on_new_graph:
-            G_new=graph_Louvain (G_new, 
-                      graph_GraphML=None)
-
-        #print (".")
-        embeddings=update_node_embeddings(embeddings, G_new, tokenizer, model)
-        #print (".")
-        graph_root=f'graph'
-        graph_GraphML=  f'{data_dir_output}/{graph_root}_graphML_integrated.graphml'  #  f'{data_dir}/resulting_graph.graphml',
-        #print (".")
-        nx.write_graphml(G_new, graph_GraphML)
-        #print ("Done...")
-        
-    except:
-        print (end="")
-        graph_GraphML=None
-        G_new=None
-        
-    
-    
-    
-    return graph_GraphML, G_new, embeddings
-'''
-
 
 def remove_small_fragents (G_new, size_threshold):
     if size_threshold >0:
@@ -800,55 +635,6 @@ def simplify_node_name_with_llm(node_name, generate, max_tokens=2048, temperatur
 import networkx as nx
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
-'''
-def simplify_graph(graph, node_embeddings, similarity_threshold=0.9, use_llm=False, data_dir_output='./',
-                  graph_root='simple_graph_', verbatim=False):
-    nodes = list(node_embeddings.keys())
-     
-    # Ensure each embedding is 1D
-    embeddings_matrix = np.array([node_embeddings[node].flatten() for node in nodes])  # Use .flatten() or .squeeze()
-    
-    #embeddings_matrix = np.array([node_embeddings[node] for node in nodes])
-    similarity_matrix = cosine_similarity(embeddings_matrix)
-    to_merge = np.where(similarity_matrix > similarity_threshold)
-
-    node_mapping = {}
-    for i, j in zip(*to_merge):
-        if i != j:  # ignore self-similarity
-            node_i, node_j = nodes[i], nodes[j]
-            # Decide based on degree of connectivity or any other criteria
-            if verbatim:
-                print ("node to keep and merge: ",  node_i,"<--",  node_j)
-            if graph.degree(node_i) >= graph.degree(node_j):
-                node_to_keep, node_to_merge = node_i, node_j
-            else:
-                node_to_keep, node_to_merge = node_j, node_i
-           
-            # Optionally use LLM to generate a simplified or more descriptive name
-            if use_llm:
-                node_to_keep = simplify_node_name_with_llm(node_to_keep)
-           
-            node_mapping[node_to_merge] = node_to_keep
-
-    new_graph = nx.relabel_nodes(graph, node_mapping, copy=True)
-
-    graph_GraphML=  f'{data_dir_output}/{graph_root}_graphML_simplified.graphml'  #  f'{data_dir}/resulting_graph.graphml',
-        #print (".")
-    nx.write_graphml(new_graph, graph_GraphML)
-    return new_graph
-'''
-'''
-def regenerate_node_embeddings(graph, nodes_to_recalculate, tokenizer, model):
-    """
-    Regenerate embeddings for specific nodes.
-    """
-    new_embeddings = {}
-    for node in tqdm(nodes_to_recalculate):
-        inputs = tokenizer(node, return_tensors="pt")
-        outputs = model(**inputs)
-        new_embeddings[node] = outputs.last_hidden_state.mean(dim=1).detach().numpy()
-    return new_embeddings
-'''
 
 def simplify_graph_simple(graph_, node_embeddings, tokenizer, model, similarity_threshold=0.9, use_llm=False,
                   data_dir_output='./',
@@ -915,13 +701,10 @@ import networkx as nx
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
 
-
-
-
 def simplify_node_name_with_llm(node_name, max_tokens, temperature):
     # This is a placeholder for the actual function that uses a language model
     # to generate a simplified or more descriptive node name.
-    return node_name  # Placeholder implementation
+    return node_name  
 
 def regenerate_node_embeddings(graph, nodes_to_recalculate, tokenizer, model):
     """
@@ -1004,7 +787,6 @@ def simplify_graph(graph_, node_embeddings, tokenizer, model, similarity_thresho
 
     return new_graph, updated_embeddings
 
-
 def make_HTML (G,data_dir='./', graph_root='graph_root'):
 
     net = Network(
@@ -1035,7 +817,6 @@ def make_HTML (G,data_dir='./', graph_root='graph_root'):
 
     return graph_HTML
 
-
 def return_giant_component_of_graph (G_new ):
     connected_components = sorted(nx.connected_components(G_new), key=len, reverse=True)
     G_new = G_new.subgraph(connected_components[0]).copy()
@@ -1046,12 +827,6 @@ def return_giant_component_G_and_embeddings (G_new, node_embeddings):
     G_new = G_new.subgraph(connected_components[0]).copy()
     node_embeddings=update_node_embeddings(node_embeddings, G_new, tokenizer, model, verbatim=verbatim)
     return G_new, node_embeddings
-
-
-
-
-#####################
-
 
 def extract_number(filename):
     # This function extracts numbers from a filename and converts them to an integer.
@@ -1081,8 +856,6 @@ def get_list_of_graphs_and_chunks (graph_q='graph_*_graph_clean.csv',  chunk_q='
     
     return graph_file_list, chunk_file_list
 
-
-
 def print_graph_nodes_with_texts(G, separator="; ", N=64):
     """
     Prints out each node in the graph along with the associated texts, concatenated into a single string.
@@ -1097,7 +870,6 @@ def print_graph_nodes_with_texts(G, separator="; ", N=64):
         concatenated_texts = separator.join(texts)
         print(f"Node: {node}, Texts: {concatenated_texts[:N]}")      
        
-
 def print_graph_nodes (G, separator="; ", N=64):
     """
     Prints out each node in the graph along with the associated texts, concatenated into a single string.
@@ -1178,34 +950,6 @@ import networkx as nx
 from tqdm import tqdm
 import os
 
-'''
-def save_graph_without_text(G_or, data_dir='./', graph_name='my_graph.graphml'):
-    G = deepcopy(G_or)
-
-    # Process nodes: remove 'texts' attribute and convert others to string
-    for _, data in tqdm(G.nodes(data=True), desc="Processing nodes"):
-        if 'texts' in data:
-            del data['texts']  # Remove the 'texts' attribute
-        # Convert all other attributes to strings
-        for key in data:
-            data[key] = str(data[key])
-
-    # Process edges: similar approach, remove 'texts' and convert attributes
-    for _, _, data in tqdm(G.edges(data=True), desc="Processing edges"):
-        if 'texts' in data:
-            del data['texts']  # Remove the 'texts' attribute
-        # Convert all other attributes to strings
-        for key in data:
-            data[key] = str(data[key])
-    
-    # Ensure correct directory path and file name handling
-    fname = os.path.join(data_dir, graph_name)
-    
-    # Save the graph to a GraphML file
-    nx.write_graphml(G, fname)
-    return fname
-'''
-
 def save_graph_without_text(G_or, data_dir='./', graph_name='my_graph.graphml'):
     G = deepcopy(G_or)
 
@@ -1252,7 +996,6 @@ def print_nodes_and_labels (G, N=10):
         
 
     return ch_list
-
 
 import pandas as pd
 import numpy as np
@@ -1365,7 +1108,6 @@ def simplify_graph_with_text(graph_, node_embeddings, tokenizer, model, similari
     Also, merges 'texts' node attribute ensuring no duplicates.
     """
 
-#    graph = graph_.copy()
     graph = deepcopy(graph_)
     
     nodes = list(node_embeddings.keys())
@@ -1427,10 +1169,8 @@ def simplify_graph_with_text(graph_, node_embeddings, tokenizer, model, similari
     # Save the simplified graph to a file.
     graph_path = f'{graph_root}_graphML_simplified_JSON.graphml'
     save_graph_with_text_as_JSON (new_graph, data_dir=data_dir_output, graph_name=graph_path)
-    #graph_path = f'{graph_root}_graphML_simplified_notext.graphml'
-    #save_graph_without_text(new_graph, data_dir=data_dir_output, graph_name=graph_path)
-
-    if verbatim:
+    
+    verbatim:
         print(f"Graph simplified and saved to {graph_path}")
 
     return new_graph, updated_embeddings
