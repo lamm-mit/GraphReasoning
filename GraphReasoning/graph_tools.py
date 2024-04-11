@@ -1170,7 +1170,7 @@ def simplify_graph_with_text(graph_, node_embeddings, tokenizer, model, similari
     graph_path = f'{graph_root}_graphML_simplified_JSON.graphml'
     save_graph_with_text_as_JSON (new_graph, data_dir=data_dir_output, graph_name=graph_path)
     
-    verbatim:
+    if verbatim:
         print(f"Graph simplified and saved to {graph_path}")
 
     return new_graph, updated_embeddings
