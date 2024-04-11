@@ -399,18 +399,16 @@ class ConversationAgent_LlamaIndex:
         return response.response, response
 
 def conversation_simulator_LlamaIndex(
-    #model, tokenizer, 
+      
      llm_answer, llm_question,
     question_gpt_name='Engineer',answer_gpt_name='Biologist', answer_instructions='You answer correctly.',
-  #  question_temperature = 0.7,conv_temperature=0.3,
-    #bot1: ConversationAgent,
+  
     question_asker_instructions='You always respond with a single, tough, question. ',
     q='What is bioinspiration?',
     total_turns: int = 5,data_dir='./',
     marker_ch='>>> ',start_with_q=False,only_last=True, 
     marker_ch_outer='### ',sample_question='',
-    # messages_to_prompt=None,
-               # completion_to_prompt=None,
+     
     answer_index=None,question_index=None, verbose=False,chat_mode="context",chat_token_limit=2500,
     iterate_on_question=False,#whether to revise question after initial draft, 
     include_N_turns_in_question_development=9999,single_shot_question=True,
@@ -418,9 +416,9 @@ def conversation_simulator_LlamaIndex(
     )-> list[dict[str,str]]:
 
     answer_agent = ConversationAgent_LlamaIndex(llm_answer,
-                                                #model, tokenizer,  
+                                              
                                                 name=answer_gpt_name, instructions=answer_instructions, 
-                             #  temperature=conv_temperature, #messages_to_prompt=messages_to_prompt,   completion_to_prompt=completion_to_prompt,
+                         
                                                 index=answer_index,verbose=verbose,chat_mode=chat_mode,chat_token_limit=chat_token_limit,
                                                )
     
@@ -440,16 +438,8 @@ def conversation_simulator_LlamaIndex(
         
         conversation_turns.append(dict(name=answer_gpt_name, text=last_reply))
 
-        #print (f">>>{last_reply}<<<")
-        #print ("1:-----------------------------------------")
-        #for turn in conversation_turns:
-        #    print(f"{turn['name']}: {turn['text']}\n")
-        #    print ("-----------------------------------------")
-        #input("Press Enter to continue...")
-
         if only_last:
                 
-            #txt=f'### Consider this response. "{q}\n\n{last_reply}\n\n"'
             txt= f'Consider this question and response.\n\n{marker_ch_outer}Question: {q}\n\n{marker_ch_outer} Response: {last_reply}'
 
         else:
@@ -460,16 +450,7 @@ def conversation_simulator_LlamaIndex(
             
             txt=f'{marker_ch_outer}Read this conversation between {question_gpt_name} and {answer_gpt_name}:\n\n```{conv}```\n\n"'
 
-
-        if single_shot_question: # SINGLE SHOT QUESTION
-            '''        
-            q=f"""{txt}\n\n{marker_ch_outer}Instruction: Respond with a SINGLE follow-up question that critically challenges the earlier responses. 
-    
-    DO NOT answer the question or comment on it yet. Do NOT repeat a question that was asked in the earlier conversation, just respond with the# question only.{sample_question}
-    
-    The single question is:"""            
-            '''
-    #        q=f"""{txt}\n\n{marker_ch_outer}Instruction: Respond with a SINGLE follow-up question. 
+        if single_shot_question: # SINGLE SHOT QUESTION 
     
             q=f"""{txt}\n\n{marker_ch_outer}Instruction: Respond with a SINGLE follow-up question that critically challenges the earlier responses. 
     
@@ -479,14 +460,11 @@ The single question is:"""
     
             q=f"""{txt}\n\n{marker_ch_outer}Please generate a thoughtful and challenging follow-up question. {sample_question}{question_gpt_name}:"""
             
-            #print ("\n\n------------------------------\nPrompt for Q:\n\n", q,"------------------------------\n\n")
-            
             print (f"\n\n### {question_gpt_name}: ", end="")
             
             q_new, q_chat=get_answer_LlamaIndex (llm_question,#model, tokenizer, 
                                             q=q, #temperature=question_temperature,
-                                             #messages_to_prompt=messages_to_prompt,
-                                       # completion_to_prompt=completion_to_prompt,
+                    
                                             index=question_index,verbose=verbose,chat_mode=chat_mode,chat_token_limit=chat_token_limit,
                  system_prompt=question_asker_instructions+"You MUST respond with ONE new probing question. ONLY provide the question.")
 
@@ -494,12 +472,12 @@ The single question is:"""
             q=f"""{txt}\n\n{marker_ch_outer}Instruction: Summarize the conversation, with details. Include logic and reasoning, and think step by step."""
             print (f"\n\n### {question_gpt_name}, summary: ", end="")
             summary_for_q, chat_engine=get_answer_LlamaIndex (llm_question, q=q,  #messages_to_prompt=messages_to_prompt,
-               # completion_to_prompt=completion_to_prompt, 
+               
                                  system_prompt="You analyze text and develop questions.", chat_engine=None)
             q=f"""{marker_ch_outer}Please generate a thoughtful and challenging follow-up question. {sample_question}\n\nThe question is:"""
             print (f"\n\n### {question_gpt_name}: ", end="")
             q_new, chat_engine=get_answer_LlamaIndex (llm_question, q=q,  #messages_to_prompt=messages_to_prompt,
-               # completion_to_prompt=completion_to_prompt, 
+                
                                  system_prompt="You analyze text and develop questions.",chat_engine=chat_engine)
         
                 
@@ -509,14 +487,11 @@ The single question is:"""
             print (f"\n\n### {question_gpt_name} (iterate): ", end="")
             q_new, _=get_answer_LlamaIndex (llm_question,#model, tokenizer, 
                                             q=f"Make sure >>>{q_new}<<< is a SINGLE question.\n\nDO NOT answer the question. If it is a single question, just reply with the question.{sample_question}\n\nThe SINGLE question is: ", #temperature=question_temperature,
-                                            #messages_to_prompt=messages_to_prompt,
-                                    # completion_to_prompt=completion_to_prompt,
+                                         
                                             index=question_index,verbose=verbose,chat_mode=chat_mode,chat_token_limit=chat_token_limit,
              system_prompt="You pose questions.",chat_engine=q_chat
                                                 )
 
-        
-     
         q_new=q_new.replace('"', '')
         
         print (f"\n")
@@ -527,12 +502,8 @@ The single question is:"""
     return conversation_turns, answer_agent.get_conv(), response, answer_agent
 
 
-def read_and_summarize_LlamaIndex( llm,
-                                  #model, tokenizer, 
-                                  txt='This is a conversation.', q='',
-                  #messages_to_prompt=None,
-                #completion_to_prompt=None,   
-                                 ):
+def read_and_summarize_LlamaIndex( llm, txt='This is a conversation.', q='',
+                   ):
     q=f"""Carefully read this conversation: 
 
 >>>{txt}<<<
@@ -542,8 +513,7 @@ Accurately summarize the conversation and identify the key points made.
 Think step by step: 
 """ 
 
-    summary, chat_engine=get_answer_LlamaIndex (llm, q=q,  #messages_to_prompt=messages_to_prompt,
-               # completion_to_prompt=completion_to_prompt, 
+    summary, chat_engine=get_answer_LlamaIndex (llm, q=q,   
                                  system_prompt="You analyze text and provide an accurate account of the content from all sides discussed.")
 
     q=f'Now list the salient insights as bullet points.'
@@ -560,9 +530,6 @@ Think step by step:
 
      
     return summary, bullet, takeaway
-    
- 
-
 
 def answer_question_LlamaIndex ( #model, tokenizer, 
                                 
@@ -576,8 +543,7 @@ Keep your answers brief, but accurate, and creative.
                     bot_name_2="Engineer",
                     bot_instructions_2 = """You are a critical engineer. You are taking part in a discussion, from the perspective of engineering.
 Keep your answers brief, and always challenge statements in a provokative way. As a creative individual, you inject ideas from other fields. """,
-                  #  question_temperature = 0.1,
-                   #  conv_temperature=0.3,
+                 
                      include_N_turns_in_question_development=99999,
                     total_turns=4,
                     delete_last_question=True, #whether or not the last question is deleted (since it is not actually answered anyway)
@@ -588,14 +554,10 @@ Keep your answers brief, and always challenge statements in a provokative way. A
                       messages_to_prompt=None,question_index=None, answer_index=None,chat_mode="context",chat_token_limit=2500,
                 completion_to_prompt=None,iterate_on_question=False,iterate_on_question_with_earlier_context=True,verbose=False,
                     ):
-
-    
-    
     
     conversation_turns, answer_agent_conv, response, answer_agent = conversation_simulator_LlamaIndex( llm_answer, llm_question,#  model, tokenizer, 
                                                 question_gpt_name=bot_name_2,answer_gpt_name=bot_name_1,
-                                             #   question_temperature=question_temperature,conv_temperature=conv_temperature,
-                                                question_asker_instructions=bot_instructions_2,
+                                               question_asker_instructions=bot_instructions_2,
                                                 q=q, question_index=question_index, answer_index=answer_index,
   include_N_turns_in_question_development=include_N_turns_in_question_development, 
     single_shot_question=single_shot_question,                                                                
@@ -603,8 +565,7 @@ Keep your answers brief, and always challenge statements in a provokative way. A
                                                            start_with_q=start_with_q,only_last=only_last, sample_question=sample_question,
                                                       verbose=verbose,chat_mode=chat_mode,chat_token_limit=chat_token_limit,
                                                     iterate_on_question=iterate_on_question,iterate_on_question_with_earlier_context=iterate_on_question_with_earlier_context,
-                               #  messages_to_prompt=messages_to_prompt, completion_to_prompt=completion_to_prompt,
-                                                          )
+                              )
 
     if delete_last_question:
         conversation_turns.pop()
