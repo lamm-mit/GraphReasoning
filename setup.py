@@ -3,8 +3,8 @@ from setuptools import setup, find_packages
 setup(
     name='GraphReasoning',
     version='0.1.0',
-    author='Your Name',
-    author_email='your.email@example.com',
+    author='Markus J. Buehler',
+    author_email='mbuehler@mit.edu',
     packages=find_packages(),
     install_requires=[
         # Any dependencies your package needs. For example:
@@ -38,9 +38,10 @@ setup(
         seaborn,
         uuid,
         pdfminer.six,
-        
+        xlora,  
     ],
-    description='A brief description of your package.',
+  
+    description='GraphReasoning: Use LLM to reason over graphs, combined with multi-agent modeling.',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     url='URL to your GitHub repo',
@@ -52,5 +53,5 @@ setup(
         # 'Programming Language :: Python :: 3.7',
         # 'Programming Language :: Python :: 3.8',
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.10',
 )
