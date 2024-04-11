@@ -7,7 +7,7 @@ import os
 
 import copy
 import re
-#from guidance import gen, select, system, user, assistant,  newline
+
 from IPython.display import display, Markdown
 
 import markdown2
@@ -55,11 +55,11 @@ import matplotlib.pyplot as plt
 import transformers
 from transformers import logging
 
-#transformers.logging.set_verbosity_info()
+ 
 logging.set_verbosity_error()
 
 import re
-#from guidance import gen, select, system, user, assistant,  newline
+ 
 from IPython.display import display, Markdown
 
 import markdown2
@@ -201,7 +201,7 @@ def heuristic_path_with_embeddings(G, embedding_tokenizer, embedding_model, sour
             print(f"HTML visualization: {fname}")
 
         graph_GraphML = f'shortestpath_2hops_{time_part}_{source}_{target}.graphml'
-        #nx.write_graphml(subgraph, graph_GraphML)
+        
         save_graph_without_text(subgraph, data_dir=data_dir, graph_name=graph_GraphML)
 
         
@@ -284,9 +284,6 @@ def find_shortest_path_with2hops (G, source='graphene', target='complexity',
         fname=None
         graph_GraphML=None
         
-  
-   
-    
     shortest_path_length = len(path) - 1  # As path length is number of edges
     
     return path, path_graph , shortest_path_length, fname, graph_GraphML
@@ -296,7 +293,6 @@ def find_N_paths (G, source='graphene', target='complexity', N=5):
     
     sampled_paths = []
     fname_list=[]
-    sampled_path_lengths=[]
     
     # Use a generator to find simple paths and collect up to num_sampled_paths
     paths_generator = nx.all_simple_paths(G, source=source, target=target)
@@ -328,9 +324,6 @@ def find_N_paths (G, source='graphene', target='complexity', N=5):
 
     return sampled_paths, fname_list#, sampled_path_lengths, 
         
-#find_shortest_path (G,source='graphene', target='silk')
-
-
 from itertools import combinations
 
 def find_all_triplets(G):
@@ -351,19 +344,16 @@ def print_node_pairs_edge_title(G):
     #print ("Format: node_1, relationship, node_2")
     return pairs_and_titles
 
-
 def find_path( G, node_embeddings,  tokenizer, model, keyword_1 = "music and sound", keyword_2 = "graphene", 
               verbatim=True, second_hop=False,data_dir='./', similarity_fit_ID_node_1=0, similarity_fit_ID_node_2=0,save_files=True,
               ):
     
-    #best_node_1, best_similarity_1= find_best_fitting_node(keyword_1, node_embeddings, tokenizer, model)
     best_node_1, best_similarity_1=find_best_fitting_node_list(keyword_1, node_embeddings, tokenizer, model, max (5, similarity_fit_ID_node_1+1))[similarity_fit_ID_node_1]
     
     if verbatim:
         print(f"{similarity_fit_ID_node_1}nth best fitting node for '{keyword_1}': '{best_node_1}' with similarity: {best_similarity_1}")
     
     
-    #best_node_2, best_similarity_2 = find_best_fitting_node(keyword_2, node_embeddings, tokenizer, model)
     best_node_2, best_similarity_2 = find_best_fitting_node_list(keyword_2, node_embeddings, tokenizer, model,  max (5, similarity_fit_ID_node_2+1))[similarity_fit_ID_node_2]
     if verbatim:
         print(f"{similarity_fit_ID_node_2}nth best fitting node for '{keyword_2}': '{best_node_2}' with similarity: {best_similarity_2}")
@@ -439,7 +429,6 @@ def describe_communities_with_plots(G, N=10, N_nodes=5, data_dir='./'):
     plt.ylabel('Size (Number of Nodes)')
     plt.savefig(f'{data_dir}/size_of_communities.svg')
     plt.show()
-
 
     # Determine subplot grid size
     rows = math.ceil(N / 2)
@@ -610,7 +599,6 @@ def is_scale_free_simple(G, plot_distribution=True, data_dir='./'):
 
     return is_scale_free, fit
      
- 
 def is_scale_free(G, plot_distribution=True, data_dir='./', manual_xmin=None):
     """
     Determines if the network G is scale-free using the powerlaw package.
@@ -779,11 +767,6 @@ def find_path_and_reason (G, node_embeddings,  tokenizer, model, generate,
             G_vis=visualize_paths_pretty([path_list_for_vis], filename=f'{best_node_1}_{best_node_2}.svg', display_graph=display_graph,data_dir=data_dir, scale=1.25, node_size=4000,words_per_line=words_per_line)
             nx.write_graphml(G_vis, f'{data_dir}/{best_node_1}_{best_node_2}.graphml')
             make_HTML (G_vis,data_dir=data_dir, graph_root=f'{best_node_1}_{best_node_2}')
-
-
-
-        
-        #join_strings = lambda strings: keywords_separator.join(strings)
         
         task=task+f"{inst_prepend}Consider these nodes and their relations, forming a path:\n\n{path_list_string}\n\nThese keywords form a path in a knowledge graph between {keyword_1} and {keyword_2}, along with their edges that describe the relationship between nodes.\n\n"
 
@@ -800,14 +783,12 @@ def find_path_and_reason (G, node_embeddings,  tokenizer, model, generate,
         if N_limit != None:
             node_list=node_list[:N_limit]
         
-        #nodes_edge_list=print_node_pairs_edge_title(path_graph)
         task=task+f"{inst_prepend}Consider this list of nodes and relations in a knowledge graph:\n\nFormat: node_1, relationship, node_2\n\nThe data is:\n\n{join_strings_newline( node_list)}\n\nThese are from a knowledge graph between {keyword_1} and {keyword_2}.\n\n"
 
     task=task+f"{inst_prepend}{instruction}"
-    #display( Markdown("**Task:** "+task))
+    
     print ( task)
     
-    #response = llm.complete(task).text
     response=generate(system_prompt=system_prompt, #local_llm=local_llm,
          prompt=task, max_tokens=max_tokens, temperature=temperature)
     
@@ -859,11 +840,7 @@ def find_path_with_relations_and_reason_combined(G, node_embeddings, tokenizer, 
 
     # Generate task and response for each path or combination
     for i, (start_id, end_id, path_list, path_list_vis, path_list_string) in enumerate(paths_details):
-        #if i == 0:  # First path or combination
-        #    task_instruction = instruction  # Original instruction for the primary path
-        #else:
-        #    task_instruction = f"Reflect on how this path offers different insights or complements the primary path."
-
+        
         complete_path_list.append (path_list_vis)
         if i == 0:  # First combination
             task += f"{inst_prepend}Primary combination (path from {start_id} to {end_id}):\n\n{path_list_string}\n\nThis represents the main combination of nodes in the knowledge graph between {keyword_1} and {keyword_2}.\n\n"
@@ -906,8 +883,7 @@ def process_path_combination(G, node_embeddings, tokenizer, model, keyword_1, ke
         similarity_fit_ID_node_1=start_id,
         similarity_fit_ID_node_2=end_id,data_dir=data_dir,save_files=save_files,
     )
-    #if include_keywords_as_nodes:
-    #    all_paths=[] #used to collect all paths 
+
     if visualize_paths_as_graph:
         path_new, _ = print_path_with_edges_as_list(G, path, keywords_separator=keywords_separator)
          
@@ -942,8 +918,6 @@ def process_path_combination(G, node_embeddings, tokenizer, model, keyword_1, ke
     # Store path details
     paths_details.append((start_id, end_id, path_list, path_list_vis, path_list_string))
     return paths_details
-
-
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -1020,15 +994,11 @@ def visualize_paths_unique(paths, filename='graph_distinguish.svg', display_grap
     nx.draw_networkx_labels(G, pos, labels=node_labels, font_size=10*scale, font_color='darkblue')
     edge_labels = nx.get_edge_attributes(G, 'label')
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=10*scale, font_color='red')
-
     
     plt.axis('off')
     plt.savefig(data_dir + filename, format='svg')
     if display_graph:
         plt.show()
-    
-    
-    #plt.close()
 
     return G
 def visualize_paths_and_save_with_labels(paths, filename='graph.svg', display_graph=False, data_dir='./',scale=1.25, node_size=4000,words_per_line=2):
@@ -1070,52 +1040,6 @@ def visualize_paths_and_save_with_labels(paths, filename='graph.svg', display_gr
         plt.close()  # Close the plot to prevent it from displaying unnecessarily
 
     return G
-'''
-def visualize_paths_pretty(paths, filename='graph_pretty.svg', display_graph=False, data_dir='./', scale=1.25, node_size=4000, words_per_line=2):
-    # Create a new directed graph
-    G = nx.DiGraph()
-    
-    # Add nodes and edges with labels for each path in the list of paths
-    for path in paths:
-        for i in range(0, len(path) - 2, 2):  # Step by 2 to skip to the next node
-            node_start = path[i]
-            relationship = path[i + 1]
-            node_end = path[i + 2]
-            relationship = split_label(relationship, words_per_line=words_per_line)
-            G.add_edge(node_start.lower(), node_end.lower(), label=relationship.lower())
-
-    # Determine the linear position of each node
-    all_nodes = set()
-    for path in paths:
-        for node in path[::2]:  # Select only the nodes, skipping the relationships
-            all_nodes.add(node.lower())
-    all_nodes = list(all_nodes)  # Convert set to list to fix the order of nodes
-    
-    # Create a linear position mapping for each node
-    pos = {node: (i, 0) for i, node in enumerate(all_nodes)}
-
-    # Draw the graph using the linear positions
-    plt.figure(figsize=(15, 10))  # Set the size of the figure
-    nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=node_size, 
-            edge_color='gray', linewidths=1*scale, font_size=10*scale, 
-            arrows=True, arrowsize=20*scale, alpha=0.8)
-
-    # Draw edge labels
-    edge_labels = nx.get_edge_attributes(G, 'label')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red', font_size=10*scale)
-    
-    # Save the graph as an SVG file
-    plt.savefig(data_dir + filename, format='svg')
-    
-    # Display the graph in the Jupyter Notebook if requested
-    if display_graph:
-        plt.show()
-    else:
-        plt.close()  # Close the plot to prevent it from displaying unnecessarily
-
-    return G
-
-'''
 
 def visualize_paths_pretty(paths, filename='graph_pretty.svg', display_graph=False, data_dir='./', scale=1.25, node_size=4000, words_per_line=2):
     # Create a new directed graph
@@ -1207,7 +1131,6 @@ def visualize_paths_pretty_spiral(paths, filename='graph_pretty.svg', display_gr
 
     return G
 
-
 import os
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -1287,8 +1210,6 @@ def analyze_and_visualize_community_structure(G, data_dir='./', root='graph', al
 
     plt.show()
 
-
-
 import os
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -1360,7 +1281,6 @@ def split_label_forgraph(label, max_words=2):
         split_labels = [' '.join(words[i:i+max_words]) for i in range(0, len(words), max_words)]
         return '\n'.join(split_labels)
 
-
 def find_isomorphism_and_map_edges_justnodebased(G1, G2):
     # Create a GraphMatcher object for G1 and G2
     matcher = GraphMatcher(G1, G2)
@@ -1417,7 +1337,6 @@ def find_isomorphism_and_map_edges(G1, G2, edge_label='title'):
         print("The graphs are not isomorphic.")
         return None, None
 
-        
 def visualize_community_structure_in_giant_component(G1, G2, title1='Subgraph 1 Giant Component', title2='Subgraph 2 Giant Component', filename='plot.svg',
                                                     data_dir='./', root='graph'):
     plt.figure(figsize=(24, 12))  # Adjust the figure size as needed
@@ -1477,7 +1396,7 @@ def find_and_save_isomorphic_subgraphs_with_communities(G1, G2, data_dir, root='
     for iso_map in tqdm(matcher.subgraph_isomorphisms_iter()):
         if iter_count >= max_iter:
             break  # Exit the loop if the maximum number of iterations is reached
-    #for iso_map in tqdm(matcher.subgraph_isomorphisms_iter(), total=max_iter):
+    
         subgraph1 = G1.subgraph(iso_map.keys())
         subgraph2 = G2.subgraph(iso_map.values())
         
@@ -1506,8 +1425,7 @@ def find_and_save_isomorphic_subgraphs_with_communities(G1, G2, data_dir, root='
 
     print ("Done, scores: ",scores_subgraphs[:top_n])  
     for i, (score, subgraph1, subgraph2) in enumerate(scores_subgraphs[:top_n], 1):
-    #for i, (score, subgraph1, subgraph2) in enumerate(tqdm(scores_subgraphs[:top_n], 1), 1):
-    #for i, (score, subgraph1, subgraph2) in enumerate(tqdm(scores_subgraphs[:top_n], 1), 1):
+    
         nx.write_graphml(subgraph1, os.path.join(data_dir, f"top_{i}_subgraph1_{root}.graphml"))
         nx.write_graphml(subgraph2, os.path.join(data_dir, f"top_{i}_subgraph2_{root}.graphml"))
 
@@ -1521,9 +1439,6 @@ def find_and_save_isomorphic_subgraphs_with_communities(G1, G2, data_dir, root='
         plt.show ()
         plt.close()
 
-        # Visualize and save the giant components with edge labels
-        #visualize_and_save_giant_component(subgraph1,  os.path.join(data_dir, f"top_{i}_subgraph1_giant_{root}.png"))
-        #visualize_and_save_giant_component(subgraph2, f"Top {i} Subgraph 2 Giant Component", os.path.join(data_dir, f"top_{i}_subgraph2_giant_{root}.png"))
         visualize_community_structure_in_giant_component(subgraph1, subgraph2, title1=f"Top {i} Subgraph 1 Giant Component", 
                                                          title2=f"Top {i} Subgraph 2 Giant Component", filename=f"{data_dir}/top_{i}_subgraph1-2_giant_{root}.svg",
                                                          data_dir=data_dir, root='graph')
@@ -1537,9 +1452,8 @@ def find_and_save_isomorphic_subgraphs_with_communities(G1, G2, data_dir, root='
 def return_giant_component_of_graph (G_new ):
     connected_components = sorted(nx.connected_components(G_new), key=len, reverse=True)
     G_new = G_new.subgraph(connected_components[0]).copy()
-    #node_embeddings=update_node_embeddings(node_embeddings, G_new, tokenizer, model, verbatim=verbatim)
+   
     return G_new#, node_embeddings
-
 
 import networkx as nx
 def calculate_bridging_coefficient(G):
@@ -1567,45 +1481,12 @@ def remove_top_n_bridging_centrality(G, top_N):
     # Sort nodes by bridging centrality and select the top N nodes
     top_n_nodes = sorted(bridging_centrality, key=bridging_centrality.get, reverse=True)[:top_N]
 
-    
-    
     # Create a new graph without the top N nodes
     G_new = G.copy()
     G_new.remove_nodes_from(top_n_nodes)
 
     return G_new
-'''
-def include_top_n_bridging_centrality(G, top_N=5):
-    # Calculate betweenness centrality for all nodes
-    betweenness_centrality = nx.betweenness_centrality(G)
-    
-    # Calculate bridging coefficient for all nodes
-    bridging_coefficient = calculate_bridging_coefficient(G)
-    
-    # Calculate bridging centrality for all nodes
-    bridging_centrality = {node: betweenness_centrality[node] * bridging_coefficient[node] for node in G.nodes()}
-    
-    # Sort nodes by bridging centrality and select the top N nodes
-    top_n_nodes = sorted(bridging_centrality, key=bridging_centrality.get, reverse=True)[:top_N]
 
-    #print("Top N nodes by bridging centrality:", top_n_nodes)
-    # Print the names, bridging coefficient, and betweenness centrality of the top N nodes
-    print ("############################################")
-    print("Top N nodes by bridging centrality:")
-    for node in top_n_nodes:
-        print(f"Node: {node}, Bridging centrality: {bridging_centrality[node]}, Bridging Coefficient: {bridging_coefficient[node]}, Betweenness Centrality: {betweenness_centrality[node]}")
-        
-    # Create a new graph that includes only the top N nodes
-    G_new = nx.Graph()
-    G_new.add_nodes_from(top_n_nodes)
-    # Add edges between these nodes if they existed in the original graph
-    for node1 in top_n_nodes:
-        for node2 in top_n_nodes:
-            if G.has_edge(node1, node2):
-                G_new.add_edge(node1, node2, **G[node1][node2])
-    
-    return G_new
-'''
 def include_top_n_betweenness_centrality(G, top_N=5):
     # Calculate betweenness centrality for all nodes
     betweenness_centrality = nx.betweenness_centrality(G)
@@ -1631,16 +1512,6 @@ def include_top_n_betweenness_centrality(G, top_N=5):
     
     return G_new
 
-'''
-# Assuming the calculate_bridging_coefficient function is defined as before
-def calculate_bridging_coefficient(G):
-    degrees = dict(G.degree())
-    bridging_coefficient = {}
-    for node in G.nodes():
-        neighbors = list(G.neighbors(node))
-        bridging_coefficient[node] = (1 / degrees[node]) * sum((1 / degrees[neighbor]) for neighbor in neighbors)
-    return bridging_coefficient
-'''
 # Define the function to calculate and add bridging centrality as a node attribute
 def add_bridging_and_centrality_attributes(G):
     G_new=G.copy()
@@ -1688,18 +1559,15 @@ def use_graph_and_reason_over_triples (path_graph, generate,
         node_list=node_list[:N_limit]
 
     print ("Node list: ", node_list)
-        
-    #nodes_edge_list=print_node_pairs_edge_title(path_graph)
 
     if include_keywords_as_nodes:
         task=task+f"The following is a graph provided from an analysis of relationships between the concepts of {keyword_1} and {keyword_2}.\n\n"
     task=task+f"{inst_prepend}Consider this list of nodes and relations in a knowledge graph:\n\nFormat: node_1, relationship, node_2\n\nThe data is:\n\n{join_strings_newline( node_list)}\n\n"
 
     task=task+f"{inst_prepend}{instruction}"
-    #display( Markdown("**Task:** "+task))
-    print ( task)
     
-    #response = llm.complete(task).text
+    print (task)
+    
     response=generate(system_prompt=system_prompt, #local_llm=local_llm,
          prompt=task, max_tokens=max_tokens, temperature=temperature)
     
