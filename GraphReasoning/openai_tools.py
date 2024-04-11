@@ -3,21 +3,18 @@ import base64
 import requests
 from datetime import datetime
 from GraphReasoning.graph_tools import *
-#from GraphReasoning.graph_generation import *
+
 from GraphReasoning.utils import *
 from GraphReasoning.graph_analysis import *
-#from GraphReasoning.agents import *
 
-#from GraphReasoning.xlora_tools import *
 import openai
 
- 
 def generate_OpenAIGPT ( system_prompt='You are a materials scientist.', prompt="Decsribe the best options to design abrasive materials.",
               temperature=0.2,max_tokens=2048,timeout=120,
-             #gpt_model='gpt-3.5-turbo',
+             
              frequency_penalty=0, 
              presence_penalty=0, 
-             top_p=1., #local_llm=None,
+             top_p=1.,  
                openai_api_key='',gpt_model='gpt-4-vision-preview', organization='',
              ):
     client = openai.OpenAI(api_key=openai_api_key,
@@ -92,18 +89,13 @@ def reason_over_image_OpenAI (system_prompt='You are a scientist.', prompt='Care
           ]
         }
       ],
-     # "temperature":temperature,
+      
         "max_tokens":max_tokens,
-     #   "model":gpt_model,
-    #    "timeout":timeout,
-       # frequency_penalty=frequency_penalty,
-       # presence_penalty=presence_penalty,
-       # top_p=top_p,
+     
     }
     
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload,)
-    #return response
-    #display(response.json())
+   
     if verbatim:
         display (Markdown(response.json()['choices'][0]['message']['content']))
 
@@ -142,20 +134,18 @@ def reason_over_image_and_graph_via_triples (path_graph, generate, image_path=''
     if verbatim:
         print ("Node list: ", node_list)
         
-    #nodes_edge_list=print_node_pairs_edge_title(path_graph)
-
+     
     if include_keywords_as_nodes:
         task=task+f"The following is a graph provided from an analysis of relationships between the concepts of {keyword_1} and {keyword_2}.\n\n"
     task=task+f"Consider this list of nodes and relations in a knowledge graph:\n\nFormat: node_1, relationship, node_2\n\nThe data is:\n\n{join_strings_newline( node_list)}\n\n"
 
     task=task+f"{instruction}"
-    #task= f"{instruction}"
-    #display( Markdown("**Task:** "+task))
+     
     if verbatim:
         print ( "###############################################################\nTASK:\n", task)
     
-    #response = llm.complete(task).text
-    response=generate(system_prompt=system_prompt, #local_llm=local_llm,
+ 
+    response=generate(system_prompt=system_prompt,  
          prompt=task, max_tokens=max_tokens, temperature=temperature,image_path=image_path,)
     
     if verbatim:
@@ -171,7 +161,6 @@ from PIL import Image  # used to print and edit images
 import base64
 from IPython.display import display, Image
 import json
- 
 
 def develop_prompt_from_text_and_generate_image (response, generate_OpenAIGPT, image_dir_name='./image_temp/', number_imgs=1,
                                                 size="1024x1024",show_img=True,max_tokens=2048,temperature=0.3,
@@ -186,17 +175,11 @@ def develop_prompt_from_text_and_generate_image (response, generate_OpenAIGPT, i
     img_list=[]
     if direct_prompt == None:
         task=f'''Consider this description of a novel material: {response}
+
+Develop a well-constructed, detailed and clear prompt for DALLE-3 that allows me to visualize the new material design. 
         
-    Develop a well-constructed, detailed and clear prompt for DALLE-3 that allows me to visualize the new material design. 
-        
-    The prompt should be written such that the resulting image presents a clear reflection of the material's real microstructure and key features. Make sure that the resulting image does NOT include any text.
-    '''
-        #gpt_model='gpt-4-1106-vision-preview'
-        #gpt_model='gpt-4-vision-preview'
-      #  gpt_model='gpt-4-0125-preview' #best model to date
-        #generate_OpenAIGPT
-    
-        
+The prompt should be written such that the resulting image presents a clear reflection of the material's real microstructure and key features. Make sure that the resulting image does NOT include any text.
+'''
         
         response=generate_OpenAIGPT(system_prompt=system_prompt, #local_llm=local_llm,
                  prompt=task, max_tokens=max_tokens, temperature=temperature, )
@@ -216,30 +199,20 @@ def develop_prompt_from_text_and_generate_image (response, generate_OpenAIGPT, i
         style=style,
         quality=quality,
         size=size,
-        #response_format="url",
+        
         response_format="b64_json",
     )
-    #image_data = json.loads(generation_response) 
     
-    #print(image_data)
-    # print response
 
     for index, image_dict in enumerate(generation_response.data):
         image_data = base64.b64decode(image_dict.b64_json)
-        # Generate a random string of letters and digits
-        #random_part = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
         
         # Get the current time
         time_part = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
-         
-        
-        
 
         image_file = os.path.join(image_dir_name, f"generated_image_{time_part}_{response[:32]}_{index}.png")
         with open(image_file, mode="wb") as png:
             png.write(image_data)
         display(Image(data=image_data))
      
-
     return img_list
