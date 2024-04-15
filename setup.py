@@ -2,19 +2,16 @@ from setuptools import setup, find_packages
 
 setup(
     name='GraphReasoning',
-    version='0.1.0',
+    version='0.2.0',
     author='Markus J. Buehler',
     author_email='mbuehler@mit.edu',
     packages=find_packages(),
     install_requires=[
-        # Any dependencies your package needs. For example:
-        # 'numpy>=1.19.2',
-        # 'pandas>=1.1.3',
         numpy,
         networkx,
         matplotlib,
         pandas,
-        transformers>4.39.3,
+        transformers>=4.39,
         powerlaw,
         markdown2, 
         pdfkit,
