@@ -6,8 +6,7 @@ setup(
     author='Markus J. Buehler',
     author_email='mbuehler@mit.edu',
     packages=find_packages(),
-    install_requires=[
-        numpy,
+    install_requires=[numpy,
         networkx,
         matplotlib,
         pandas,
@@ -41,7 +40,7 @@ setup(
     description='GraphReasoning: Use LLM to reason over graphs, combined with multi-agent modeling.',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='URL to your GitHub repo',
+    url='https://github.com/lamm-mit/GraphReasoning',
     classifiers=[
         # Choose your license as you wish
         'License :: OSI Approved :: MIT License',
