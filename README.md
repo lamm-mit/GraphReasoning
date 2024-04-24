@@ -18,6 +18,10 @@ Or, editable:
 ```
 pip install -e git+https://github.com/lamm-mit/GraphReasoning
 ```
+Install X-LoRA, if needed:
+```
+pip install git+https://github.com/EricLBuehler/xlora.git
+```
 If you plan to use llama.cpp, install using:
 ```
 CMAKE_ARGS="-DLLAMA_CUBLAS=on " pip install  'git+https://github.com/abetlen/llama-cpp-python.git#egg=llama-cpp-python[server]' --force-reinstall --upgrade --no-cache-dir
