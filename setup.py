@@ -41,6 +41,7 @@ setup(
         'xlora',
         'community',
         'guidance',
+        'wkhtmltopdf'
     ],
     description='GraphReasoning: Use LLM to reason over graphs, combined with multi-agent modeling.',
     long_description=long_description,
