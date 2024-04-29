@@ -38,7 +38,7 @@ setup(
         'seaborn',
         'uuid',
         'pdfminer.six',
-        'git+https://github.com/EricLBuehler/xlora.git',
+        'xlora',
         'community',
         'guidance',
     ],
