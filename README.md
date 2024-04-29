@@ -22,6 +22,10 @@ Install X-LoRA, if needed:
 ```
 pip install git+https://github.com/EricLBuehler/xlora.git
 ```
+You may need wkhtmltopdf for the multi-agent model:
+```
+sudo apt-get install wkhtmltopdf
+```
 If you plan to use llama.cpp, install using:
 ```
 CMAKE_ARGS="-DLLAMA_CUBLAS=on " pip install  'git+https://github.com/abetlen/llama-cpp-python.git#egg=llama-cpp-python[server]' --force-reinstall --upgrade --no-cache-dir
