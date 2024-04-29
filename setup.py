@@ -38,7 +38,9 @@ setup(
         'seaborn',
         'uuid',
         'pdfminer.six',
-        'xlora'
+        'git+https://github.com/EricLBuehler/xlora.git',
+        'community',
+        'guidance',
     ],
     description='GraphReasoning: Use LLM to reason over graphs, combined with multi-agent modeling.',
     long_description=long_description,
