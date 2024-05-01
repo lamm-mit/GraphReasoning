@@ -13,7 +13,7 @@ import seaborn as sns  # For more attractive plotting
 
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-import community as community_louvain
+from community import community_louvain
 import networkx as nx
 import pandas as pd  # Assuming colors2Community returns a pandas DataFrame
 
