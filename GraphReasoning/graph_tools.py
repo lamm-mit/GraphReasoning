@@ -161,7 +161,7 @@ def find_best_fitting_node_list(keyword, embeddings, tokenizer, model, N_samples
     for node, embedding in embeddings.items():
         # Ensure embedding is 1-D
         embedding = embedding.flatten()  # Flatten to ensure 1-D
-        similarity = 1 - cosine(keyword_embedding, embedding)  # Cosine similarity
+        similarity = 1 - cosine(keyword_embedding, embedding) # Cosine similarity
         
         # If the heap is smaller than N_samples, just add the current node and similarity
         if len(min_heap) < N_samples:
@@ -174,7 +174,7 @@ def find_best_fitting_node_list(keyword, embeddings, tokenizer, model, N_samples
                 
     # Convert the min-heap to a sorted list in descending order of similarity
     best_nodes = sorted(min_heap, key=lambda x: -x[0])
-    
+    print(best_nodes)
     # Return a list of tuples (node, similarity)
     return [(node, similarity) for similarity, node in best_nodes]
 

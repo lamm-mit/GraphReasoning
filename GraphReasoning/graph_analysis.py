@@ -365,7 +365,7 @@ def find_path( G, node_embeddings,  tokenizer, model, keyword_1 = "music and sou
     
     return (best_node_1, best_similarity_1, best_node_2, best_similarity_2), path, path_graph, shortest_path_length, fname, graph_GraphML
 
-import community as community_louvain
+from community import community_louvain
 import math
 
 def describe_communities(G, N=10):
@@ -1137,7 +1137,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 from networkx.algorithms.community import greedy_modularity_communities
 from networkx.algorithms.community.quality import modularity
-import community as community_louvain  # This is the python-louvain package
+from community import community_louvain  # This is the python-louvain package
 
 def analyze_and_visualize_community_structure(G, data_dir='./', root='graph', algorithm='greedy_modularity'):
     os.makedirs(data_dir, exist_ok=True)
