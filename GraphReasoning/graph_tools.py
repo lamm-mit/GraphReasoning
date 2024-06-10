@@ -440,7 +440,7 @@ def graph_statistics_and_plots_for_large_graphs (G, data_dir='./', include_centr
     num_edges = G.number_of_edges()
     degrees = [degree for node, degree in G.degree()]
     log_degrees = np.log1p(degrees)  # Using log1p for a better handle on zero degrees
-   
+    #degree_distribution = np.bincount(degrees)
     average_degree = np.mean(degrees)
     density = nx.density(G)
     connected_components = nx.number_connected_components(G)
@@ -467,9 +467,9 @@ def graph_statistics_and_plots_for_large_graphs (G, data_dir='./', include_centr
         plt.yscale('log')
         xlab_0='Log(1 + Degree)'
         if density_opt:
-            ylab_0='Frequency'
+            ylab_0='Probability Distribution'
         else: 
-            ylab_0='Probability'
+            ylab_0='Probability Distribution'
         ylab_0=ylab_0 + log_hist_scale*' (log)'    
         
         
@@ -479,9 +479,9 @@ def graph_statistics_and_plots_for_large_graphs (G, data_dir='./', include_centr
         counts, bins, patches = plt.hist(degrees, bins=bins, alpha=0.75, color='blue', log=log_hist_scale, density=density_opt)
         xlab_0='Degree'
         if density_opt:
-            ylab_0='Frequency'
+            ylab_0='Probability Distribution'
         else: 
-            ylab_0='Probability'
+            ylab_0='Probability Distribution'
         ylab_0=ylab_0 + log_hist_scale*' (log)'     
         plt_title='Histogram of Node Degrees'
 
