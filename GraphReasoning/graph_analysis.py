@@ -1243,10 +1243,13 @@ def visualize_community_structure_nolabels(G, title="Graph", ax=None):
     
     ax.set_title(title)
     plt.axis('off')
+
 def get_giant_component(G):
-    # This function returns the giant component of a graph G
+    # This function returns a copy of the giant component of a graph G
     Gcc = sorted(nx.connected_components(G), key=len, reverse=True)
-    return G.subgraph(Gcc[0])
+    giant_component = G.subgraph(Gcc[0])
+    return giant_component.copy()
+ 
 def visualize_community_structure(G, title="Graph", ax=None):
     if ax is None:
         _, ax = plt.subplots(figsize=(8, 6))
