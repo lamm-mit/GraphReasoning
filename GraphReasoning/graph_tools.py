@@ -376,6 +376,62 @@ def visualize_embeddings_with_gmm_density_voronoi_and_print_top_samples(embeddin
             desc = descriptions[original_idx]
             print(f"- Description: {desc}, Distance: {distances[idx]:.2f}")
 
+def analyze_network(G,  data_dir='./', root = 'graph_analysis'):
+    # Compute the degrees of the nodes
+    # Compute the degrees of the nodes
+    degrees = [d for n, d in G.degree()]
+    
+    # Compute maximum, minimum, and median node degrees
+    max_degree = max(degrees)
+    min_degree = min(degrees)
+    median_degree = np.median(degrees)
+    
+    # Number of nodes and edges
+    num_nodes = G.number_of_nodes()
+    num_edges = G.number_of_edges()
+    
+    # Average node degree
+    avg_degree = np.mean(degrees)
+    
+    # Density of the network
+    density = nx.density(G)
+    
+    # Number of communities (using connected components as a simple community proxy)
+    num_communities = nx.number_connected_components(G)
+    
+    # Print the results
+    print(f"Maximum Degree: {max_degree}")
+    print(f"Minimum Degree: {min_degree}")
+    print(f"Median Degree: {median_degree}")
+    print(f"Number of Nodes: {num_nodes}")
+    print(f"Number of Edges: {num_edges}")
+    print(f"Average Node Degree: {avg_degree:.2f}")
+    print(f"Density: {density:.4f}")
+    print(f"Number of Communities: {num_communities}")
+    
+    # Plot the results
+    fig, axs = plt.subplots(5, 1, figsize=(10, 15))
+
+    metrics = [
+        ('Number of Nodes', num_nodes),
+        ('Number of Edges', num_edges),
+        ('Avg Node Degree', avg_degree),
+        ('Density', density),
+        ('Number of Communities', num_communities)
+    ]
+    
+    for ax, (label, value) in zip(axs, metrics):
+        ax.barh(label, value, color='blue')
+        ax.set_xlim(0, max(value * 1.1, 1.1))  # Adding some padding for better visualization
+        ax.set_xlabel('Value')
+        ax.set_title(label)
+    
+    plt.tight_layout()
+    plt.savefig(f'{data_dir}/community_structure_{root}.svg')
+    # Show the plot
+    plt.show()
+    
+    return max_degree, min_degree, median_degree
 
 def graph_statistics_and_plots(G, data_dir='./'):
     # Calculate statistics
