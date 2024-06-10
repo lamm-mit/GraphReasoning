@@ -431,8 +431,10 @@ def graph_statistics_and_plots(G, data_dir='./'):
     
     return statistics
  
-def graph_statistics_and_plots_for_large_graphs(G, data_dir='./', include_centrality=False,
-                                               make_graph_plot=False,root='graph'):
+def graph_statistics_and_plots_for_large_graphs (G, data_dir='./', include_centrality=False,
+                                                 make_graph_plot=False,root='graph', log_scale=True, 
+                                                 log_hist_scale=True,
+                                                ):
     # Basic statistics
     num_nodes = G.number_of_nodes()
     num_edges = G.number_of_edges()
@@ -457,15 +459,29 @@ def graph_statistics_and_plots_for_large_graphs(G, data_dir='./', include_centra
     # Plotting
     # Degree Distribution on a log-log scale
     plt.figure(figsize=(10, 6))
-    counts, bins, patches = plt.hist(log_degrees, bins=50, alpha=0.75, color='blue', log=True)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.title('Log-Log Degree Distribution')
-    plt.xlabel('Degree (log)')
-    plt.ylabel('Frequency (log)')
-    plt.savefig(f'{data_dir}/loglog_degree_distribution_{root}.svg')
-    plt.close()
+    xlab_0='Degree'
+    ylab_0='Frequency'
+    if log_scale:
+        counts, bins, patches = plt.hist(log_degrees, bins=50, alpha=0.75, color='blue', log=log_hist_scale)
+    
+        plt.xscale('log')
+        xlab_0='Degree (log)'
+        ylab_0='Frequency (log)'
+        plt.yscale('log')
+        plt_title='Log-Log Degree Distribution'
+        
+    else:
+        counts, bins, patches = plt.hist(degrees, bins=50, alpha=0.75, color='blue', log=log_hist_scale)
+        xlab_0='Degree'
+        ylab_0='Frequency'       
+        plt_title='Degree Distribution'
 
+    plt.title(plt_title)
+    plt.xlabel(xlab_0)
+    plt.ylabel(ylab_0)
+    plt.savefig(f'{data_dir}/{plt_title}_{root}.svg')
+    plt.show()
+    
     if make_graph_plot:
         
         # Additional Plots
@@ -476,6 +492,7 @@ def graph_statistics_and_plots_for_large_graphs(G, data_dir='./', include_centra
         nx.draw_networkx(G, pos, node_color=list(partition.values()), node_size=20, cmap=cmap, with_labels=False)
         plt.title('Community Structure')
         plt.savefig(f'{data_dir}/community_structure_{root}.svg')
+        plt.show()
         plt.close()
 
     # Save statistics
@@ -497,8 +514,6 @@ def graph_statistics_and_plots_for_large_graphs(G, data_dir='./', include_centra
         }
     else:
         centrality=None
- 
-    
     return statistics, include_centrality
 
 ## Now add these colors to communities and make another dataframe
