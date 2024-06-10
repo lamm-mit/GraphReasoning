@@ -433,14 +433,14 @@ def graph_statistics_and_plots(G, data_dir='./'):
  
 def graph_statistics_and_plots_for_large_graphs (G, data_dir='./', include_centrality=False,
                                                  make_graph_plot=False,root='graph', log_scale=True, 
-                                                 log_hist_scale=True,
+                                                 log_hist_scale=True,density_opt=False, bins=50,
                                                 ):
     # Basic statistics
     num_nodes = G.number_of_nodes()
     num_edges = G.number_of_edges()
     degrees = [degree for node, degree in G.degree()]
     log_degrees = np.log1p(degrees)  # Using log1p for a better handle on zero degrees
-    #degree_distribution = np.bincount(degrees)
+   
     average_degree = np.mean(degrees)
     density = nx.density(G)
     connected_components = nx.number_connected_components(G)
@@ -459,22 +459,31 @@ def graph_statistics_and_plots_for_large_graphs (G, data_dir='./', include_centr
     # Plotting
     # Degree Distribution on a log-log scale
     plt.figure(figsize=(10, 6))
-    xlab_0='Degree'
-    ylab_0='Frequency'
+     
     if log_scale:
-        counts, bins, patches = plt.hist(log_degrees, bins=50, alpha=0.75, color='blue', log=log_hist_scale)
+        counts, bins, patches = plt.hist(log_degrees, bins=bins, alpha=0.75, color='blue', log=log_hist_scale, density=density_opt)
     
         plt.xscale('log')
-        xlab_0='Degree (log)'
-        ylab_0='Frequency (log)'
         plt.yscale('log')
-        plt_title='Log-Log Degree Distribution'
+        xlab_0='Log(1 + Degree)'
+        if density_opt:
+            ylab_0='Frequency'
+        else: 
+            ylab_0='Probability'
+        ylab_0=ylab_0 + log_hist_scale*' (log)'    
+        
+        
+        plt_title='Histogram of Log-Transformed Node Degrees with Log-Log Scale'
         
     else:
-        counts, bins, patches = plt.hist(degrees, bins=50, alpha=0.75, color='blue', log=log_hist_scale)
+        counts, bins, patches = plt.hist(degrees, bins=bins, alpha=0.75, color='blue', log=log_hist_scale, density=density_opt)
         xlab_0='Degree'
-        ylab_0='Frequency'       
-        plt_title='Degree Distribution'
+        if density_opt:
+            ylab_0='Frequency'
+        else: 
+            ylab_0='Probability'
+        ylab_0=ylab_0 + log_hist_scale*' (log)'     
+        plt_title='Histogram of Node Degrees'
 
     plt.title(plt_title)
     plt.xlabel(xlab_0)
@@ -514,6 +523,8 @@ def graph_statistics_and_plots_for_large_graphs (G, data_dir='./', include_centr
         }
     else:
         centrality=None
+ 
+    
     return statistics, include_centrality
 
 ## Now add these colors to communities and make another dataframe
