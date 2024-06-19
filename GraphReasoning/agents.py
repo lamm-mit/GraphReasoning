@@ -11,7 +11,9 @@ from guidance import models, gen, select
 from guidance.models import LlamaCpp
 from guidance.models import Chat
 import re
-from guidance import gen, select, system, user, assistant,  newline
+from guidance import gen, select, system, user, assistant
+newline = "\n"
+
 from IPython.display import display, Markdown
 
 import markdown2
