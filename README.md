@@ -16,7 +16,7 @@ pip install git+https://github.com/lamm-mit/GraphReasoning
 ```
 Or, editable:
 ```
-pip install -e git+https://github.com/lamm-mit/GraphReasoning
+pip install -e git+https://github.com/lamm-mit/GraphReasoning.git#egg=GraphReasoning
 ```
 Install X-LoRA, if needed:
 ```
