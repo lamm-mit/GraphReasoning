@@ -26,6 +26,7 @@ setup(
         'torchvision',
         'torchaudio',
         'huggingface_hub',
+        'xlora @ git+https://github.com/EricLBuehler/xlora.git@main#egg=xlora',
         'langchain',
         'pyvis',
         'yachalk',
@@ -38,7 +39,6 @@ setup(
         'seaborn',
         'uuid',
         'pdfminer.six',
-        'xlora',
         'community',
         'guidance',
         'wkhtmltopdf'
