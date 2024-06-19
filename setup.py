@@ -40,6 +40,7 @@ setup(
         'pdfminer.six',
         'community',
         'guidance',
+        'python-louvain',
         'wkhtmltopdf'
     ],
     description='GraphReasoning: Use LLM to reason over graphs, combined with multi-agent modeling.',
