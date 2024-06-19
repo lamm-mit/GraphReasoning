@@ -25,7 +25,7 @@ setup(
         'torch',
         'torchvision',
         'torchaudio',
-        'huggingface-cli',
+        'huggingface_hub',
         'langchain',
         'pyvis',
         'yachalk',
