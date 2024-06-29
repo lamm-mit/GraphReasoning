@@ -1577,3 +1577,230 @@ def use_graph_and_reason_over_triples (path_graph, generate,
     display(Markdown("**Response:** "+response ))
 
     return response ,  path_graph, shortest_path_length, fname, graph_GraphML
+
+
+
+
+import networkx as nx
+import random
+from heapq import heappop, heappush
+from datetime import datetime
+from pyvis.network import Network
+from copy import deepcopy
+import numpy as np
+
+def heuristic_path_with_embeddings_with_randomization_waypoints(G, embedding_tokenizer, embedding_model, source, target, 
+                                   node_embeddings, top_k=3, second_hop=False,
+                                   data_dir='./', save_files=True, verbatim=False,
+                                   randomness_factor=0.5, num_random_waypoints=3):
+
+    """
+    Finds a heuristic-based path between two nodes in a graph, utilizing node embeddings to estimate distances.
+    Additionally, introduces randomness and intermediate waypoints to create more diverse paths.
+
+    Parameters:
+    -----------
+    G : networkx.Graph
+        The input graph.
+    
+    embedding_tokenizer : Callable
+        Tokenizer for processing node names or identifiers for embeddings.
+    
+    embedding_model : Callable
+        Model used to generate embeddings for nodes.
+    
+    source : str
+        The starting node for the path.
+    
+    target : str
+        The destination node for the path.
+    
+    node_embeddings : dict
+        A dictionary containing embeddings for the nodes.
+    
+    top_k : int, optional, default=3
+        The number of top neighbors to consider at each step.
+    
+    second_hop : bool, optional, default=False
+        Whether to include second-hop neighbors in the subgraph.
+    
+    data_dir : str, optional, default='./'
+        Directory to save output files.
+    
+    save_files : bool, optional, default=True
+        Whether to save the output files (HTML visualization and GraphML file).
+    
+    verbatim : bool, optional, default=False
+        Whether to print detailed logs for debugging and tracing the pathfinding process.
+    
+    randomness_factor : float, optional, default=0.5
+        A factor between 0 and 1 that controls the balance between heuristic-based pathfinding and randomness.
+        0 means completely heuristic-based (shortest path), and 1 means completely random.
+    
+    num_random_waypoints : int, optional, default=3
+        The number of random waypoints to introduce into the path to create more diverse paths.
+    
+    Returns:
+    --------
+    path : list
+        The list of nodes representing the path from source to target.
+    
+    subgraph : networkx.Graph
+        The subgraph containing the path and optionally its second-hop neighbors.
+    
+    shortest_path_length : int
+        The length of the shortest path (number of edges) found.
+    
+    fname : str or None
+        The filename of the HTML visualization if save_files is True, otherwise None.
+    
+    graph_GraphML : str or None
+        The filename of the GraphML file if save_files is True, otherwise None.
+    
+    Example Usage:
+    --------------
+    path, path_graph, shortest_path_length, _, _ = heuristic_path_with_embeddings(
+        G, 
+        embedding_tokenizer, 
+        embedding_model, 
+        source, 
+        target, 
+        node_embeddings, 
+        top_k=3, 
+        second_hop=False, 
+        data_dir='./', 
+        save_files=True, 
+        verbatim=True, 
+        randomness_factor=0.5,
+        num_random_waypoints=3
+    )
+    
+    if path is not None:
+        path_list_for_vis, path_list_for_vis_string = print_path_with_edges_as_list(G, path, keywords_separator='--')
+        print(path_list_for_vis_string)
+    else:
+        print("No valid path found.")
+    """
+                                    
+    G = deepcopy(G)
+
+    if verbatim:
+        print("Original: ", source, "-->", target)
+    source_list = find_best_fitting_node_list(source, node_embeddings, embedding_tokenizer, embedding_model, 5)
+    target_list = find_best_fitting_node_list(target, node_embeddings, embedding_tokenizer, embedding_model, 5)
+    
+    if not source_list or not target_list:
+        print("Error: Unable to find best fitting nodes for source or target.")
+        return None, None, None, None, None
+
+    source = source_list[0][0].strip()
+    target = target_list[0][0].strip()
+
+    if verbatim:
+        print("Selected: ", source, "-->", target)
+    
+    def heuristic(current, target):
+        """Estimate distance from current to target using embeddings."""
+        return euclidean_distance(node_embeddings[current], node_embeddings[target])
+
+    def dijkstra_with_randomness(G, source, target, randomness_factor):
+        queue = [(0, source, [])]
+        visited = set()
+        while queue:
+            (cost, node, path) = heappop(queue)
+            if node not in visited:
+                visited.add(node)
+                path = path + [node]
+                if node == target:
+                    return path
+                neighbors = list(G.neighbors(node))
+                random.shuffle(neighbors)
+                for neighbor in neighbors:
+                    if neighbor not in visited:
+                        new_cost = cost + G[node][neighbor].get('weight', 1)
+                        priority = new_cost + randomness_factor * random.random()
+                        heappush(queue, (priority, neighbor, path))
+        return None
+
+    def add_random_waypoints(G, path, num_waypoints):
+        all_neighbors = []
+        for node in path:
+            all_neighbors.extend([neighbor for neighbor in G.neighbors(node) if neighbor not in path])
+        random.shuffle(all_neighbors)
+        waypoints = all_neighbors[:num_waypoints]
+        new_path = path[:1]  # Start with the source node
+        
+        for waypoint in waypoints:
+            waypoint_path = nx.shortest_path(G, source=new_path[-1], target=waypoint, weight='weight')
+            new_path.extend(waypoint_path[1:])  # Add the path to the waypoint, avoid duplication of the last node
+        
+        final_leg = nx.shortest_path(G, source=new_path[-1], target=target, weight='weight')
+        new_path.extend(final_leg[1:])  # Add the final leg to the target, avoid duplication of the last node
+        return new_path
+
+    def sample_path_with_randomness(source, target, randomness_factor, num_random_waypoints):
+        if randomness_factor == 0:
+            # Use Dijkstra's algorithm for the shortest path
+            try:
+                path = nx.shortest_path(G, source=source, target=target, weight='weight')
+            except nx.NetworkXNoPath:
+                print(f"No path found between {source} and {target} using Dijkstra's algorithm.")
+                return None
+        else:
+            path = dijkstra_with_randomness(G, source, target, randomness_factor)
+            if path is None:
+                return None
+
+        if num_random_waypoints > 0:
+            path = add_random_waypoints(G, path, num_random_waypoints)
+        
+        return path
+
+    path = sample_path_with_randomness(source, target, randomness_factor, num_random_waypoints)
+    if path is None:
+        print(f"No path found between {source} and {target}")
+        return None, None, None, None, None 
+
+    # Build subgraph with attributes
+    subgraph = nx.DiGraph()
+    for i in range(len(path) - 1):
+        u, v = path[i], path[i + 1]
+        if G.has_edge(u, v):
+            subgraph.add_edge(u, v, **G[u][v])
+    if second_hop:
+        for node in path:
+            for neighbor in G.neighbors(node):
+                if not subgraph.has_node(neighbor):
+                    subgraph.add_node(neighbor, **G.nodes[neighbor])
+                if G.has_edge(node, neighbor):
+                    subgraph.add_edge(node, neighbor, **G.edges[node, neighbor])
+                for second_hop_neighbor in G.neighbors(neighbor):
+                    if not subgraph.has_node(second_hop_neighbor):
+                        subgraph.add_node(second_hop_neighbor, **G.nodes[second_hop_neighbor])
+                    if G.has_edge(neighbor, second_hop_neighbor):
+                        subgraph.add_edge(neighbor, second_hop_neighbor, **G.edges[neighbor, second_hop_neighbor])
+
+    if save_files:
+        time_part = datetime.now().strftime("%Y%m%d_%H%M%S")
+        nt = Network('500px', '1000px', notebook=True)
+        
+        # Add nodes and edges from the subgraph to the Pyvis network
+        nt.from_nx(subgraph)
+        
+        fname = f'{data_dir}/shortest_path_2hops_{time_part}_{source}_{target}.html'
+        nt.show(fname)
+        if verbatim:
+            print(f"HTML visualization: {fname}")
+
+        graph_GraphML = f'shortestpath_2hops_{time_part}_{source}_{target}.graphml'
+        save_graph_without_text(subgraph, data_dir=data_dir, graph_name=graph_GraphML)
+        
+        if verbatim:
+            print(f"GraphML file: {graph_GraphML}")  
+    else:
+        fname = None
+        graph_GraphML = None
+    
+    shortest_path_length = len(path) - 1  # As path length is number of edges        
+
+    return path, subgraph, shortest_path_length, fname, graph_GraphML
