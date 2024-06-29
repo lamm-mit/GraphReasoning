@@ -1589,11 +1589,17 @@ from pyvis.network import Network
 from copy import deepcopy
 import numpy as np
 
+# Function to create the directory if it doesn't exist
+def ensure_directory_exists(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
 def heuristic_path_with_embeddings_with_randomization_waypoints(G, embedding_tokenizer, embedding_model, source, target, 
                                    node_embeddings, top_k=3, second_hop=False,
                                    data_dir='./', save_files=True, verbatim=False,
                                    randomness_factor=0.5, num_random_waypoints=3):
 
+    
     """
     Finds a heuristic-based path between two nodes in a graph, utilizing node embeddings to estimate distances.
     Additionally, introduces randomness and intermediate waypoints to create more diverse paths.
@@ -1680,8 +1686,7 @@ def heuristic_path_with_embeddings_with_randomization_waypoints(G, embedding_tok
         print(path_list_for_vis_string)
     else:
         print("No valid path found.")
-    """
-                                    
+    """    
     G = deepcopy(G)
 
     if verbatim:
@@ -1781,6 +1786,8 @@ def heuristic_path_with_embeddings_with_randomization_waypoints(G, embedding_tok
                         subgraph.add_edge(neighbor, second_hop_neighbor, **G.edges[neighbor, second_hop_neighbor])
 
     if save_files:
+        ensure_directory_exists(data_dir)
+        
         time_part = datetime.now().strftime("%Y%m%d_%H%M%S")
         nt = Network('500px', '1000px', notebook=True)
         
