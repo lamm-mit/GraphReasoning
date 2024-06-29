@@ -1794,12 +1794,12 @@ def heuristic_path_with_embeddings_with_randomization_waypoints(G, embedding_tok
         # Add nodes and edges from the subgraph to the Pyvis network
         nt.from_nx(subgraph)
         
-        fname = f'{data_dir}/shortest_path_2hops_{time_part}_{source}_{target}.html'
+        fname = f'{data_dir}/shortest_path_{time_part}_{source}_{target}.html'
         nt.show(fname)
         if verbatim:
             print(f"HTML visualization: {fname}")
 
-        graph_GraphML = f'shortestpath_2hops_{time_part}_{source}_{target}.graphml'
+        graph_GraphML = f'shortestpath_{time_part}_{source}_{target}.graphml'
         save_graph_without_text(subgraph, data_dir=data_dir, graph_name=graph_GraphML)
         
         if verbatim:
@@ -1811,3 +1811,215 @@ def heuristic_path_with_embeddings_with_randomization_waypoints(G, embedding_tok
     shortest_path_length = len(path) - 1  # As path length is number of edges        
 
     return path, subgraph, shortest_path_length, fname, graph_GraphML
+
+##############################
+# Visualization
+##############################
+
+import networkx as nx
+import random
+import matplotlib.pyplot as plt
+from datetime import datetime
+from pyvis.network import Network
+from copy import deepcopy
+import numpy as np
+import community as community_louvain
+from tqdm.notebook import tqdm
+
+# Function to precompute basic properties for the original graph
+def precompute_basic_properties(G):
+    if G.is_directed():
+        undirected_G = G.to_undirected()
+    else:
+        undirected_G = G
+
+    print("Compute properties...")
+    properties = {
+        "number_of_nodes": G.number_of_nodes(),
+        "number_of_edges": G.number_of_edges(),
+        "density": nx.density(G),
+        "average_clustering": nx.average_clustering(undirected_G),
+        "average_degree": sum(dict(G.degree()).values()) / G.number_of_nodes()
+    }
+    
+    return properties
+
+# Analyze basic properties function
+def analyze_basic_properties(G, original_properties=None):
+    if G.is_directed():
+        undirected_G = G.to_undirected()
+    else:
+        undirected_G = G
+    
+    properties = {
+        "number_of_nodes": G.number_of_nodes(),
+        "number_of_edges": G.number_of_edges(),
+        "density": nx.density(G),
+        "average_clustering": nx.average_clustering(undirected_G),
+        "average_degree": sum(dict(G.degree()).values()) / G.number_of_nodes()
+    }
+    
+    if original_properties:
+        original_degree_dict = dict(G.degree())
+        properties["original_degrees"] = {node: original_degree_dict.get(node, 0) for node in G.nodes()}
+    
+    return properties
+
+# Analyze communities function
+def analyze_communities(G):
+    if G.is_directed():
+        G = G.to_undirected()
+
+    partition = community_louvain.best_partition(G)
+    
+    communities = {}
+    for node, community in partition.items():
+        if community not in communities:
+            communities[community] = []
+        communities[community].append(node)
+    
+    return communities
+
+# Function to perform spectral analysis
+def spectral_analysis(G):
+    if G.is_directed():
+        G = G.to_undirected()
+        
+    L = nx.laplacian_matrix(G).todense()
+    eigenvalues = np.linalg.eigvals(L)
+    eigenvalues = np.sort(eigenvalues)
+    
+    fiedler_value = eigenvalues[1] if len(eigenvalues) > 1 else 0  # Second smallest eigenvalue
+    spectral_gap = eigenvalues[-1] - eigenvalues[-2] if len(eigenvalues) > 1 else 0  # Largest - second largest eigenvalue
+    
+    return fiedler_value, spectral_gap
+
+# Function to analyze the graph
+def analyze_graph(G, original_properties=None):
+    basic_properties = analyze_basic_properties(G, original_properties)
+    communities = analyze_communities(G)
+    fiedler_value, spectral_gap = spectral_analysis(G)
+    
+    analysis_results = {
+        "basic_properties": basic_properties,
+        "communities": communities,
+        "fiedler_value": fiedler_value,
+        "spectral_gap": spectral_gap
+    }
+    
+    return analysis_results
+
+# Function to plot analysis trends
+# Function to plot analysis trends
+def plot_analysis_trends(analysis_results, num_waypoints_range, xlabel='Number of Random Waypoints',
+                        include_avg_clustering=False):
+    num_nodes = [result["basic_properties"]["number_of_nodes"] for result in analysis_results]
+    num_edges = [result["basic_properties"]["number_of_edges"] for result in analysis_results]
+    density = [result["basic_properties"]["density"] for result in analysis_results]
+    avg_clustering = [result["basic_properties"]["average_clustering"] for result in analysis_results]
+    avg_degree = [result["basic_properties"]["average_degree"] for result in analysis_results]
+    fiedler_values = [result["fiedler_value"] for result in analysis_results]
+    spectral_gaps = [result["spectral_gap"] for result in analysis_results]
+    
+    plt.figure(figsize=(15, 9))
+
+    ii=0
+
+    ii+=1
+    plt.subplot(3, 3, ii)
+    plt.plot(num_waypoints_range, num_nodes, marker='o')
+    plt.title('Number of Nodes')
+    plt.xlabel(xlabel)
+    plt.ylabel('Number of Nodes')
+
+    
+    ii+=1
+    plt.subplot(3, 3, ii)
+    plt.plot(num_waypoints_range, num_edges, marker='o')
+    plt.title('Number of Edges')
+    plt.xlabel(xlabel)
+    plt.ylabel('Number of Edges')
+   
+    ii+=1
+    plt.subplot(3, 3, ii)
+    plt.plot(num_waypoints_range, density, marker='o')
+    plt.title('Density')
+    plt.xlabel(xlabel)
+    plt.ylabel('Density')
+
+    if include_avg_clustering:
+        ii+=1
+        plt.subplot(3, 3, ii)
+        plt.plot(num_waypoints_range, avg_clustering, marker='o')
+        plt.title('Average Clustering Coefficient')
+        plt.xlabel(xlabel)
+        plt.ylabel('Average Clustering')
+   
+    ii+=1
+    plt.subplot(3, 3, ii)
+    plt.plot(num_waypoints_range, avg_degree, marker='o')
+    plt.title('Average Degree')
+    plt.xlabel(xlabel)
+    plt.ylabel('Average Degree')
+   
+    ii+=1
+    plt.subplot(3, 3, ii)
+    plt.plot(num_waypoints_range, fiedler_values, marker='o')
+    plt.title('Fiedler Value')
+    plt.xlabel(xlabel)
+    plt.ylabel('Fiedler Value')
+   
+    ii+=1
+    plt.subplot(3, 3, ii)
+    plt.plot(num_waypoints_range, spectral_gaps, marker='o')
+    plt.title('Spectral Gap')
+    plt.xlabel(xlabel)
+    plt.ylabel('Spectral Gap')
+    
+    
+    plt.tight_layout()
+
+    plt.savefig(f"analysis_{xlabel}.svg")
+
+    plt.show()
+                         
+"""
+source= "silk"
+target= "food"
+
+# Assuming `G`, `embedding_tokenizer`, `embedding_model`, `source`, `target`, and `node_embeddings` are defined
+num_waypoints_range = [0, 1, 2, 5, 10, 20, 50]
+
+randomness_factor = 0.3
+analysis_results = []
+
+for num_waypoints in tqdm(num_waypoints_range, desc="Analyzing Waypoints"):
+    path, path_graph, shortest_path_length, _, _ = heuristic_path_with_embeddings_with_randomization_waypoints(
+        G, 
+        embedding_tokenizer, 
+        embedding_model, 
+        source, 
+        target, 
+        node_embeddings, 
+        top_k=3, 
+        second_hop=False, 
+        data_dir='./tmp_discovery_100', 
+        #save_files=False, 
+        save_files=True, 
+        
+        verbatim=False, 
+        randomness_factor=randomness_factor,
+        num_random_waypoints=num_waypoints
+    )
+    if path_graph is not None:
+        analysis_result = analyze_graph(path_graph, original_properties=original_properties,)
+        analysis_results.append(analysis_result)
+
+        #path_list_for_vis, path_list_for_vis_string=path_list=print_path_with_edges_as_list(G, path, keywords_separator='--') 
+        #print (path_list_for_vis_string,'----------')
+        #print (path_list,'----------')
+    else:
+        print(f"No valid path found for {num_waypoints} waypoints.")
+
+plot_analysis_trends(analysis_results, num_waypoints_range,xlabel='Number of Random Waypoints')
+"""
