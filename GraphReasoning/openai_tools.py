@@ -216,3 +216,113 @@ The prompt should be written such that the resulting image presents a clear refl
         display(Image(data=image_data))
      
     return img_list
+
+
+########## Chat-like interaction with OpenAI models, text or images ##########
+
+import base64
+import requests
+import json
+from transformers.image_utils import load_image
+
+# Function to encode the image
+def encode_image(image_path):
+  with open(image_path, "rb") as image_file:
+    return base64.b64encode(image_file.read()).decode('utf-8')
+from io import BytesIO  
+
+def is_url(val) -> bool:
+    return isinstance(val, str) and val.startswith("http")
+
+def get_answer( query='What is shown in this image?',model="gpt-4o",
+               image=None, payload=None, max_tokens=1024, temperature=0.1,
+               top_p=0.95, top_k=40, init_instr = "Look at this image: ",   
+               display_image=False,
+              ):
+
+    base64_image=None
+    if image != None:
+        if is_url(image):
+            image= load_image(image)
+        else:
+            image= load_image(image)
+            
+        if display_image:
+            display (image)
+
+        # Convert the image to a byte array
+        buffered = BytesIO()
+        image.save(buffered, format="PNG")  # Use the appropriate format for your image
+        img_byte_array = buffered.getvalue()
+        
+        # Encode the byte array into a base64 string
+        base64_image = base64.b64encode(img_byte_array).decode("utf-8")
+       
+    headers = {
+      "Content-Type": "application/json",
+      "Authorization": f"Bearer {api_key}"
+    }
+
+    if payload==None:
+        if base64_image!=None:
+            payload = {
+              "model": model,
+              "messages": [
+                {
+                  "role": "user",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": query
+                    },
+                    {
+                      "type": "image_url",
+                      "image_url": {
+                        "url": f"data:image/jpeg;base64,{base64_image}"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "max_tokens": max_tokens
+            }
+        else:
+            payload = {
+              "model": model,
+              "messages": [
+                {
+                  "role": "user",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": query
+                    },
+                    
+                  ]
+                }
+              ],
+              "max_tokens": max_tokens
+            }
+            
+    else:
+        payload['messages'].append ({"role":"user", "content": [
+                    {"type": "text", "text": query} ] },   )
+
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+    response_dict = response.json()
+    message_content = response_dict['choices'][0]['message']['content']
+
+    payload['messages'].append ({"role":"assistant", "content": [
+                    {"type": "text", "text": message_content} ] },   )
+
+    return message_content, payload
+'''
+answer, payload= get_answer(  query='What is graphene?', payload=None, image= None,
+                           display_image=True, model="gpt-4o-mini")
+answer, payload
+'''
+'''
+answer, payload= get_answer(  query='What do you see?', payload=None, image= "1920px-Spiderweb_with_frost.jpg",
+                           display_image=True,  model="gpt-4o-mini")
+answer
+'''
