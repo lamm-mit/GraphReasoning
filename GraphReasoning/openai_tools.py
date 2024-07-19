@@ -237,7 +237,7 @@ def is_url(val) -> bool:
 def get_answer( query='What is shown in this image?',model="gpt-4o",
                image=None, payload=None, max_tokens=1024, temperature=0.1,
                top_p=0.95, top_k=40, init_instr = "Look at this image: ",   
-               display_image=False,
+               display_image=False, system='You are a helpful assistant.'
               ):
 
     base64_image=None
@@ -267,7 +267,13 @@ def get_answer( query='What is shown in this image?',model="gpt-4o",
         if base64_image!=None:
             payload = {
               "model": model,
-              "messages": [
+              "messages": [{
+                  "role": "system",
+                  "content": [  {
+                      "type": "text",
+                      "text": system
+                    },  ]
+                },
                 {
                   "role": "user",
                   "content": [
@@ -287,18 +293,23 @@ def get_answer( query='What is shown in this image?',model="gpt-4o",
               "max_tokens": max_tokens
             }
         else:
+             
             payload = {
               "model": model,
               "messages": [
                 {
+                  "role": "system",
+                  "content": [  {
+                      "type": "text",
+                      "text": system
+                    },  ]
+                },
+                {
                   "role": "user",
-                  "content": [
-                    {
+                  "content": [  {
                       "type": "text",
                       "text": query
-                    },
-                    
-                  ]
+                    },  ]
                 }
               ],
               "max_tokens": max_tokens
